@@ -3,6 +3,7 @@ node_modules/
 dist/
 dist-web/
 dist-native/
+.artifacts/
 web-build/
 coverage/
 *.log
