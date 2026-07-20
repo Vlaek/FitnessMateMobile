@@ -31,12 +31,14 @@ export const en = {
     title: 'Start workout', choose: 'Choose a program or start an empty workout.',
     emptyWorkout: 'Empty workout', unfinished: 'Workout tracking is available in the next build step.',
   },
-  history: { title: 'History', emptyTitle: 'No workout history', emptyBody: 'Finish a workout to see it here.' },
-  progress: { title: 'Progress', emptyTitle: 'No progress data', emptyBody: 'Complete workouts to unlock analytics.' },
+  workout: { defaultName: 'Workout', noActive: 'No active workout', finish: 'Finish workout', finishTitle: 'Finish workout?', finishBody: 'Completed sets will be saved to history.', discard: 'Discard', discardTitle: 'Discard workout?', discardBody: 'This draft will be deleted.', completedSets: 'completed sets' },
+  history: { title: 'History', emptyTitle: 'No workout history', emptyBody: 'Finish a workout to see it here.', volume: 'Volume', share: 'Share', deleteTitle: 'Delete workout?', deleteBody: 'This workout will be removed permanently.' },
+  progress: { title: 'Progress', emptyTitle: 'No progress data', emptyBody: 'Complete workouts to unlock analytics.', totalWorkouts: 'Total workouts', weeklyVolume: '7-day volume', personalRecords: 'Personal records', maxWeight: 'Max weight', maxVolume: 'Best set volume' },
   settings: {
     title: 'Settings', language: 'Language', units: 'Weight units', theme: 'Theme',
     russian: 'Russian', english: 'English', kilograms: 'Kilograms', pounds: 'Pounds',
     system: 'System', light: 'Light', dark: 'Dark',
+    data: 'Data', export: 'Export backup', import: 'Import backup', clear: 'Clear all data', clearTitle: 'Clear all data?', clearBody: 'Programs, workouts, history and custom exercises will be removed.', replace: 'Replace existing data', merge: 'Merge with existing data', exportSuccess: 'Backup created', importSuccess: 'Backup imported', invalidBackup: 'This file is not a valid FitnessMate backup.', aboutOffline: 'Everything stays on this device. No account or internet is required.',
   },
   muscleGroups: { chest: 'Chest', back: 'Back', legs: 'Legs', shoulders: 'Shoulders', arms: 'Arms', core: 'Core', other: 'Other' },
   exercises: {

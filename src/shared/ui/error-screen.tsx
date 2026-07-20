@@ -3,15 +3,15 @@ import { useTranslation } from 'react-i18next';
 
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 
-export function ErrorScreen({ onRetry }: { onRetry: () => void }) {
+export function ErrorScreen({ onRetry, message, actionLabel }: { onRetry: () => void; message?: string; actionLabel?: string }) {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   return (
     <View testID="database-error" style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>{t('app.databaseError')}</Text>
-      <Pressable accessibilityRole="button" accessibilityLabel={t('common.retry')} onPress={onRetry}
+      <Text style={[styles.title, { color: colors.text }]}>{message ?? t('app.databaseError')}</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel={actionLabel ?? t('common.retry')} onPress={onRetry}
         style={[styles.button, { backgroundColor: colors.primary }]}>
-        <Text style={{ color: colors.primaryText, fontWeight: '700' }}>{t('common.retry')}</Text>
+        <Text style={{ color: colors.primaryText, fontWeight: '700' }}>{actionLabel ?? t('common.retry')}</Text>
       </Pressable>
     </View>
   );
