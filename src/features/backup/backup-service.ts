@@ -9,11 +9,12 @@ import { parseBackup, type FitnessMateBackup } from './backup-schema';
 type Sections = { programs: boolean; history: boolean };
 export async function buildBackup(sections: Sections, db: DatabaseAdapter = database): Promise<FitnessMateBackup> {
   const exercises = await db.getAllAsync<FitnessMateBackup['exercises'][number]>('SELECT * FROM exercises');
+  const workouts = sections.history ? await db.getAllAsync<FitnessMateBackup['workouts'][number]>("SELECT * FROM workouts WHERE status = 'completed'") : [];
   return { format: 'fitnessmate-backup', version: 1, exportedAt: new Date().toISOString(), sections, exercises,
     programs: sections.programs ? await db.getAllAsync('SELECT * FROM programs') : [],
     programExercises: sections.programs ? await db.getAllAsync('SELECT * FROM program_exercises') : [],
     programSets: sections.programs ? await db.getAllAsync('SELECT * FROM program_sets') : [],
-    workouts: sections.history ? await db.getAllAsync("SELECT * FROM workouts WHERE status = 'completed'") : [],
+    workouts: sections.programs ? workouts : workouts.map((workout) => ({ ...workout, source_program_id: null })),
     workoutExercises: sections.history ? await db.getAllAsync("SELECT we.* FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.status = 'completed'") : [],
     workoutSets: sections.history ? await db.getAllAsync("SELECT ws.* FROM workout_sets ws JOIN workout_exercises we ON we.id = ws.workout_exercise_id JOIN workouts w ON w.id = we.workout_id WHERE w.status = 'completed'") : [],
   };

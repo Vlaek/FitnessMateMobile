@@ -11,16 +11,16 @@ export function useActiveWorkout() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveQueue = useRef(Promise.resolve());
   const initialized = useRef(false);
   useEffect(() => { void Promise.all([workoutRepository.getActive(), exerciseRepository.listAll()]).then(([active, all]) => { setWorkoutState(active); setExercises(all); initialized.current = true; }).catch((cause) => setError(String(cause))).finally(() => setLoading(false)); }, []);
   const setWorkout = useCallback((next: Workout) => {
     setWorkoutState(next);
     if (!initialized.current) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => void workoutRepository.save(next).catch((cause) => setError(String(cause))), 250);
+    saveQueue.current = saveQueue.current
+      .then(() => workoutRepository.save(next))
+      .catch((cause) => setError(String(cause)));
   }, []);
-  useEffect(() => () => { if (saveTimer.current) clearTimeout(saveTimer.current); }, []);
   const addExercise = (exercise: Exercise, displayName: string) => { if (!workout) return; setWorkout({ ...workout, exercises: [...workout.exercises, { id: randomUUID(), sourceExerciseId: exercise.id, exerciseName: exercise.builtInKey ?? displayName, muscleGroup: exercise.muscleGroup, sets: [{ id: randomUUID(), weightKg: 0, repetitions: 10, isCompleted: false }] }] }); };
   return { workout, setWorkout, exercises, loading, error, addExercise };
 }

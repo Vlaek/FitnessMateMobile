@@ -4,8 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { useAppTheme } from '@/shared/theme/use-app-theme';
-
-import { TAB_ROUTES } from './tab-config';
+import { TAB_ROUTES } from '@/features/navigation/tab-config';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
