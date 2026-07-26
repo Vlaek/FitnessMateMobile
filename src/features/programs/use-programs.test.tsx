@@ -7,7 +7,7 @@ import { usePrograms } from './use-programs';
 
 jest.mock('expo-router', () => ({
   useFocusEffect: (callback: () => void) => {
-    const React = require('react') as typeof import('react');
+    const React = jest.requireActual<typeof import('react')>('react');
     React.useEffect(callback, [callback]);
   },
 }));

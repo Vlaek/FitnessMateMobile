@@ -37,9 +37,7 @@ export function SortableList<T>({
         return (
           <SortableRow
             accessibilityHint={accessibilityHint}
-            index={index}
             key={key}
-            layouts={layouts.current}
             testID={`sortable-item-${key}`}
             onLayout={(layout) => {
               layouts.current[index] = layout;
@@ -68,8 +66,6 @@ function SortableRow({
 }: {
   accessibilityHint: string;
   children: ReactNode;
-  index: number;
-  layouts: ItemLayout[];
   onDrop: (translationY: number) => void;
   onLayout: (layout: ItemLayout) => void;
   testID: string;
