@@ -27,6 +27,7 @@ export const en = {
     removeSet: 'Remove set', duplicateSet: 'Duplicate set', weight: 'Weight', reps: 'Reps',
     setNumber: 'Set {{number}}', chooseExercise: 'Choose exercise', searchExercise: 'Search exercises',
     customExercise: 'Create custom exercise', customName: 'Exercise name', muscleGroup: 'Muscle group',
+    reorderHint: 'Long press and drag to change exercise order',
   },
   start: {
     title: 'Start workout', choose: 'Choose a program or start an empty workout.',

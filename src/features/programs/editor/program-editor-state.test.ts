@@ -2,6 +2,7 @@ import {
   addExercise,
   addSet,
   duplicateSet,
+  moveExercise,
   removeSet,
   updateSet,
   type ProgramEditorDraft,
@@ -31,5 +32,18 @@ describe('program editor state', () => {
   it('does not remove the last set', () => {
     const draft = addExercise(empty, 'exercise-1');
     expect(removeSet(draft, 0, 0)).toBe(draft);
+  });
+
+  it('moves an exercise to an arbitrary drag destination', () => {
+    const draft: ProgramEditorDraft = {
+      ...empty,
+      exercises: ['a', 'b', 'c'].map((exerciseId) => ({
+        exerciseId,
+        sets: [{ weightKg: 0, repetitions: 0 }],
+      })),
+    };
+
+    expect(moveExercise(draft, 0, 2).exercises.map((item) => item.exerciseId))
+      .toEqual(['b', 'c', 'a']);
   });
 });
