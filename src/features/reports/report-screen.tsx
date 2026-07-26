@@ -30,7 +30,7 @@ export function ReportScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [sortMode, setSortMode] = useState<TReportSortMode>('selection');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(workoutIds.length > 0);
   const [sending, setSending] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -38,9 +38,6 @@ export function ReportScreen() {
     let cancelled = false;
 
     if (workoutIds.length === 0) {
-      setLoadError(t('reports.noSelection'));
-      setLoading(false);
-
       return () => {
         cancelled = true;
       };
@@ -147,6 +144,16 @@ export function ReportScreen() {
       setSending(false);
     }
   };
+
+  if (workoutIds.length === 0) {
+    return (
+      <ErrorScreen
+        message={t('reports.noSelection')}
+        actionLabel={t('common.goBack')}
+        onRetry={goBack}
+      />
+    );
+  }
 
   if (loading) {
     return <LoadingScreen />;

@@ -1,10 +1,10 @@
+import { TelegramCredentialsRepository, type IAsyncKeyValueStorage } from './telegram-credentials';
+
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
-
-import { TelegramCredentialsRepository, type IAsyncKeyValueStorage } from './telegram-credentials';
 
 class MemoryStorage implements IAsyncKeyValueStorage {
   private readonly values = new Map<string, string>();

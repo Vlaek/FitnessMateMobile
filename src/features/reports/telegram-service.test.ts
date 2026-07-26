@@ -55,10 +55,10 @@ describe('sendTelegramMessage', () => {
   });
 });
 
-type TelegramFetch = TTelegramFetcher;
+type TTelegramFetch = TTelegramFetcher;
 
 function telegramFetcherMock() {
-  return jest.fn<ReturnType<TelegramFetch>, Parameters<TelegramFetch>>();
+  return jest.fn<ReturnType<TTelegramFetch>, Parameters<TTelegramFetch>>();
 }
 
 function response(body: unknown, ok: boolean): Response {
