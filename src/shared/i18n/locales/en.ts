@@ -20,6 +20,7 @@ export const en = {
     sets: 'sets', exerciseCount: 'exercises', deleteTitle: 'Delete program?',
     deleteBody: 'The program will be removed. Workout history stays unchanged.', notFound: 'Program not found.',
     nameRequired: 'Enter a program name.', exerciseRequired: 'Add at least one exercise.',
+    remove: 'Delete program', reorderHint: 'Long press and drag to change program order',
   },
   editor: {
     addExercise: 'Add exercise', addSet: 'Add set', removeExercise: 'Remove exercise',
