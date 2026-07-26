@@ -2,6 +2,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { database } from '@/database/client';
 import type { IDatabaseAdapter, TSqlParams } from '@/database/types';
+import { telegramCredentials } from '@/features/reports/telegram-credentials';
 import { parseBackup, type TFitnessMateBackup } from './backup-schema';
 
 type TSections = { programs: boolean; history: boolean };
@@ -125,10 +126,14 @@ async function insert(db: IDatabaseAdapter, table: string, row: Record<string, u
   );
 }
 
-export async function clearAllData(db: IDatabaseAdapter = database) {
+export async function clearAllData(
+  db: IDatabaseAdapter = database,
+  clearTelegram: () => Promise<void> = () => telegramCredentials.clear(),
+) {
   await db.withTransactionAsync(async () => {
     await db.runAsync('DELETE FROM workouts');
     await db.runAsync('DELETE FROM programs');
     await db.runAsync('DELETE FROM exercises WHERE is_custom = 1');
   });
+  await clearTelegram();
 }

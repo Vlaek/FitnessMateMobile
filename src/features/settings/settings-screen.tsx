@@ -1,5 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,9 +9,11 @@ import {
   readBackupFile,
   restoreBackup,
 } from '@/features/backup/backup-service';
+import { telegramCredentials } from '@/features/reports/telegram-credentials';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { Screen } from '@/shared/ui/screen';
+import { TextField } from '@/shared/ui/text-field';
 import { usePreferencesStore } from './preferences-store';
 
 export function SettingsScreen() {
@@ -23,6 +26,77 @@ export function SettingsScreen() {
   const theme = usePreferencesStore((s) => s.themeMode);
   const setTheme = usePreferencesStore((s) => s.setThemeMode);
   const reset = usePreferencesStore((s) => s.reset);
+  const [telegramToken, setTelegramToken] = useState('');
+  const [telegramChatId, setTelegramChatId] = useState('');
+  const [showTelegramToken, setShowTelegramToken] = useState(false);
+  const [telegramConfigured, setTelegramConfigured] = useState(false);
+  const [telegramLoading, setTelegramLoading] = useState(true);
+  const [telegramSaving, setTelegramSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void telegramCredentials
+      .load()
+      .then((credentials) => {
+        if (!cancelled) {
+          setTelegramToken(credentials.token);
+          setTelegramChatId(credentials.chatId);
+          setTelegramConfigured(Boolean(credentials.token.trim() && credentials.chatId.trim()));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          Alert.alert(t('settings.telegramError'));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setTelegramLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const saveTelegram = async () => {
+    const credentials = {
+      token: telegramToken.trim(),
+      chatId: telegramChatId.trim(),
+    };
+    setTelegramSaving(true);
+
+    try {
+      await telegramCredentials.save(credentials);
+      setTelegramToken(credentials.token);
+      setTelegramChatId(credentials.chatId);
+      setTelegramConfigured(Boolean(credentials.token && credentials.chatId));
+      Alert.alert(t('settings.telegramSaved'));
+    } catch {
+      Alert.alert(t('settings.telegramError'));
+    } finally {
+      setTelegramSaving(false);
+    }
+  };
+
+  const removeTelegram = async () => {
+    setTelegramSaving(true);
+
+    try {
+      await telegramCredentials.clear();
+      setTelegramToken('');
+      setTelegramChatId('');
+      setTelegramConfigured(false);
+      Alert.alert(t('settings.telegramRemoved'));
+    } catch {
+      Alert.alert(t('settings.telegramError'));
+    } finally {
+      setTelegramSaving(false);
+    }
+  };
+
   const chooseExport = () =>
     Alert.alert(t('settings.export'), undefined, [
       {
@@ -92,7 +166,7 @@ export function SettingsScreen() {
     ]);
 
   return (
-    <Screen scroll contentStyle={styles.content}>
+    <Screen scroll keyboardAware contentStyle={styles.content}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>{t('settings.title')}</Text>
       </View>
@@ -125,6 +199,56 @@ export function SettingsScreen() {
         ]}
         onChange={(value) => setTheme(value as 'system' | 'light' | 'dark')}
       />
+      <View style={styles.telegramSection}>
+        <View style={styles.telegramHeading}>
+          <Text style={[styles.section, { color: colors.text }]}>{t('settings.telegram')}</Text>
+          <Text style={{ color: telegramConfigured ? colors.primary : colors.textMuted }}>
+            {telegramConfigured
+              ? t('settings.telegramConfigured')
+              : t('settings.telegramNotConfigured')}
+          </Text>
+        </View>
+        <Text style={{ color: colors.textMuted }}>{t('settings.telegramDescription')}</Text>
+        <TextField
+          label={t('settings.botToken')}
+          value={telegramToken}
+          onChangeText={setTelegramToken}
+          secureTextEntry={!showTelegramToken}
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!telegramLoading && !telegramSaving}
+        />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setShowTelegramToken((visible) => !visible)}
+        >
+          <Text style={{ color: colors.primary, fontWeight: '700' }}>
+            {showTelegramToken ? t('settings.hideToken') : t('settings.showToken')}
+          </Text>
+        </Pressable>
+        <TextField
+          label={t('settings.chatId')}
+          value={telegramChatId}
+          onChangeText={setTelegramChatId}
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!telegramLoading && !telegramSaving}
+        />
+        <View style={styles.telegramActions}>
+          <Button
+            label={t('settings.saveTelegram')}
+            loading={telegramSaving}
+            disabled={telegramLoading}
+            onPress={() => void saveTelegram()}
+          />
+          <Button
+            label={t('settings.removeTelegram')}
+            variant="ghost"
+            disabled={telegramLoading || telegramSaving}
+            onPress={() => void removeTelegram()}
+          />
+        </View>
+      </View>
       <View style={styles.dataSection}>
         <Text style={[styles.section, { color: colors.text }]}>{t('settings.data')}</Text>
         <View testID="settings-data-actions" style={styles.dataActions}>
@@ -199,4 +323,7 @@ const styles = StyleSheet.create({
   option: { borderWidth: 2, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 11 },
   dataSection: { gap: 12, paddingTop: 8, paddingBottom: 4 },
   dataActions: { gap: 12 },
+  telegramSection: { gap: 12, paddingTop: 8 },
+  telegramHeading: { gap: 4 },
+  telegramActions: { gap: 10 },
 });

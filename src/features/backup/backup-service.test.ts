@@ -1,5 +1,5 @@
 import { FakeDatabase } from '@/test/fake-database';
-import { buildBackup, restoreBackup } from './backup-service';
+import { buildBackup, clearAllData, restoreBackup } from './backup-service';
 
 describe('backup service', () => {
   it('detaches history-only backups from programs', async () => {
@@ -43,5 +43,15 @@ describe('backup service', () => {
     );
     expect(db.queries.some((query) => query.sql === 'DELETE FROM programs')).toBe(true);
     expect(db.queries.some((query) => query.sql.includes('DELETE FROM workouts'))).toBe(false);
+  });
+
+  it('clears Telegram credentials after clearing local data', async () => {
+    const db = new FakeDatabase();
+    const clearTelegram = jest.fn<Promise<void>, []>().mockResolvedValue();
+
+    await clearAllData(db, clearTelegram);
+
+    expect(db.committedTransactions).toBe(1);
+    expect(clearTelegram).toHaveBeenCalledTimes(1);
   });
 });
