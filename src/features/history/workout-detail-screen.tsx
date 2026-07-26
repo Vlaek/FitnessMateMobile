@@ -1,10 +1,11 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
 import type { TWorkout } from '@/domain/workouts/types';
+import { reportDraftStore } from '@/features/reports/report-draft-store';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
@@ -127,19 +128,9 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
     }
   };
 
-  const share = () => {
-    const body = [
-      workout.name,
-      new Date(workout.completedAt ?? workout.startedAt).toLocaleString(),
-      ...workout.exercises.map(
-        (exercise) =>
-          `${t(`exercises.${exercise.exerciseName}`, { defaultValue: exercise.exerciseName })}: ${exercise.sets
-            .filter((set) => set.isCompleted)
-            .map((set) => `${fromCanonicalKg(set.weightKg, unit)} ${unit} × ${set.repetitions}`)
-            .join(', ')}`,
-      ),
-    ].join('\n');
-    void Share.share({ title: workout.name, message: body });
+  const createReport = () => {
+    reportDraftStore.getState().setWorkoutIds([workout.id]);
+    router.push('/reports/new' as Href);
   };
 
   const remove = () =>
@@ -237,7 +228,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
         <Button label={t('common.edit')} onPress={() => setDraft(cloneWorkout(workout))} />
       )}
       <View style={styles.secondaryActions}>
-        <Button label={t('history.share')} variant="secondary" onPress={share} />
+        <Button label={t('reports.create')} variant="secondary" onPress={createReport} />
         <Button label={t('common.delete')} variant="danger" onPress={remove} />
       </View>
       <Button label={t('common.goBack')} variant="ghost" onPress={() => router.back()} />

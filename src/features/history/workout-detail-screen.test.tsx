@@ -2,11 +2,12 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import type { TWorkout } from '@/domain/workouts/types';
 import { preferencesStore } from '@/features/settings/preferences-store';
+import { reportDraftStore } from '@/features/reports/report-draft-store';
 import { setAppLanguage } from '@/shared/i18n';
 import { WorkoutDetailScreen } from './workout-detail-screen';
 
 jest.mock('expo-router', () => ({
-  router: { back: jest.fn() },
+  router: { back: jest.fn(), push: jest.fn() },
 }));
 
 jest.mock('@/database/repositories/workout-repository', () => ({
@@ -40,6 +41,7 @@ describe('WorkoutDetailScreen', () => {
   beforeAll(async () => setAppLanguage('en'));
 
   beforeEach(() => {
+    reportDraftStore.getState().clear();
     jest.mocked(workoutRepository.getById).mockResolvedValue(workout);
   });
 
@@ -82,5 +84,18 @@ describe('WorkoutDetailScreen', () => {
     expect(await view.findByText('save failed')).toBeTruthy();
     expect(view.getByText('Save')).toBeTruthy();
     expect(view.getByLabelText(`Weight (${preferencesStore.getState().weightUnit})`)).toBeTruthy();
+  });
+
+  it('starts a report draft for the viewed workout', async () => {
+    const { router } = jest.requireMock('expo-router') as {
+      router: { push: jest.Mock };
+    };
+    const view = await render(<WorkoutDetailScreen workoutId="workout-1" />);
+
+    await fireEvent.press(await view.findByText('Create report'));
+
+    expect(reportDraftStore.getState().workoutIds).toEqual(['workout-1']);
+    expect(router.push).toHaveBeenCalledWith('/reports/new');
+    expect(view.queryByText('Share')).toBeNull();
   });
 });

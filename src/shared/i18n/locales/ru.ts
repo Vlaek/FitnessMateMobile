@@ -13,6 +13,7 @@ export const ru: TTranslationShape<typeof en> = {
     add: 'Добавить',
     done: 'Готово',
     confirm: 'Подтвердить',
+    continue: 'Продолжить',
     goBack: 'Вернуться назад',
     moveUp: 'Переместить выше',
     moveDown: 'Переместить ниже',

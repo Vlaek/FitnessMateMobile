@@ -15,6 +15,7 @@ export const en = {
     add: 'Add',
     done: 'Done',
     confirm: 'Confirm',
+    continue: 'Continue',
     goBack: 'Go back',
     moveUp: 'Move up',
     moveDown: 'Move down',
