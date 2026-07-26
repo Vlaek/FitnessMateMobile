@@ -38,12 +38,14 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
     "eslint": "^9.39.5",
     "eslint-config-expo": "^57.0.0",
     "jest-expo": "^57.0.2",
+    "prettier": "^3.9.5",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -52,9 +54,13 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "lint:fix": "expo lint --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"app/**/*.{ts,tsx}\" \"eslint.config.js\" \"package.json\" \".prettierrc.json\" \".vscode/*.json\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"app/**/*.{ts,tsx}\" \"eslint.config.js\" \"package.json\" \".prettierrc.json\" \".vscode/*.json\"",
+    "fix": "npm run lint:fix && npm run format",
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
-    "check": "npm run lint && npm run typecheck && npm run test"
+    "check": "npm run format:check && npm run typecheck && npm run lint && npm test"
   },
   "jest": {
     "preset": "jest-expo",
