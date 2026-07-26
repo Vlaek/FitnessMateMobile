@@ -52,6 +52,7 @@ export interface IWorkoutRepository {
   save(workout: TWorkout): Promise<void>;
   complete(id: string): Promise<void>;
   getById(id: string): Promise<TWorkout | null>;
+  getCompletedByIds(ids: string[]): Promise<TWorkout[]>;
   listCompleted(): Promise<TWorkoutSummary[]>;
   delete(id: string): Promise<void>;
 }
@@ -76,7 +77,7 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
     const workout: TWorkout = {
       id: this.deps.createId(),
       sourceProgramId: null,
-      name: name.trim() || 'TWorkout',
+      name: name.trim() || 'Workout',
       status: 'draft',
       startedAt: timestamp,
       completedAt: null,
@@ -106,7 +107,7 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
     );
 
     if (!rows.length) {
-      throw new Error('TProgram not found or empty');
+      throw new Error('Program not found or empty');
     }
 
     const timestamp = this.deps.now();
@@ -226,6 +227,22 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
       FROM workouts w LEFT JOIN workout_exercises we ON we.workout_id = w.id
       LEFT JOIN workout_sets ws ON ws.workout_exercise_id = we.id AND ws.is_completed = 1
       WHERE w.status = 'completed' GROUP BY w.id ORDER BY w.completed_at DESC`);
+  }
+
+  async getCompletedByIds(ids: string[]): Promise<TWorkout[]> {
+    const workouts: TWorkout[] = [];
+
+    for (const id of new Set(ids)) {
+      const workout = await this.getById(id);
+
+      if (!workout || workout.status !== 'completed' || !workout.completedAt) {
+        throw new Error(`Completed workout not found: ${id}`);
+      }
+
+      workouts.push(workout);
+    }
+
+    return workouts;
   }
 
   private async assertNoActive() {
