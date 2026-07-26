@@ -15,6 +15,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
           <Stack.Screen name="workout" options={{ gestureEnabled: false }} />
           <Stack.Screen name="history/[workoutId]" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="reports/new" options={{ presentation: 'modal' }} />
         </Stack>
       </AppProviders>
     </GestureHandlerRootView>
