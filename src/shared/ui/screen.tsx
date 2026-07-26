@@ -1,7 +1,6 @@
 import type { PropsWithChildren } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -27,6 +26,7 @@ export function Screen({
 }: Props) {
   const insets = useSafeAreaInsets();
   const { colors } = useAppTheme();
+  const isIOS = process.env.EXPO_OS === 'ios';
   const insetStyle = {
     paddingTop: insets.top,
     paddingBottom: bottomInset === 'safeArea' ? insets.bottom : 0,
@@ -37,8 +37,16 @@ export function Screen({
 
   const body = scroll ? (
     <ScrollView
+      automaticallyAdjustKeyboardInsets={keyboardAware}
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardDismissMode={isIOS ? 'interactive' : 'on-drag'}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[styles.scrollContent, contentStyle]}
+      contentContainerStyle={[
+        styles.scrollContent,
+        keyboardAware && styles.keyboardScrollContent,
+        contentStyle,
+      ]}
+      testID="screen-scroll"
     >
       {children}
     </ScrollView>
@@ -58,7 +66,7 @@ export function Screen({
     <KeyboardAvoidingView
       testID="screen-root"
       enabled
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={isIOS ? 'padding' : undefined}
       style={[styles.root, insetStyle]}
     >
       {body}
@@ -70,4 +78,5 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   content: { flex: 1 },
   scrollContent: { flexGrow: 1, padding: 20, paddingBottom: 32 },
+  keyboardScrollContent: { paddingBottom: 120 },
 });

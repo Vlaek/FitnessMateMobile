@@ -27,4 +27,17 @@ describe('Screen', () => {
     );
     expect(result.getByTestId('screen-root')).toHaveStyle({ paddingTop: 44, paddingBottom: 0 });
   });
+
+  it('keeps keyboard-aware forms scrollable above the keyboard', async () => {
+    const result = await render(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <Screen scroll keyboardAware><Text>Form</Text></Screen>
+      </SafeAreaProvider>,
+    );
+
+    const scroll = result.getByTestId('screen-scroll');
+    expect(scroll.props.automaticallyAdjustKeyboardInsets).toBe(true);
+    expect(scroll.props.contentInsetAdjustmentBehavior).toBe('automatic');
+    expect(scroll.props.keyboardDismissMode).toBeTruthy();
+  });
 });
