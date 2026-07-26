@@ -39,10 +39,22 @@ describe('parseProgramInput', () => {
         exercises: [
           {
             ...validProgram.exercises[0],
-            sets: [{ weightKg: -1, repetitions: 0 }],
+            sets: [{ weightKg: -1, repetitions: 1 }],
           },
         ],
       }),
     ).toThrow();
+  });
+
+  it('accepts zero repetitions normalized from an empty field', () => {
+    const input = {
+      ...validProgram,
+      exercises: [{
+        ...validProgram.exercises[0],
+        sets: [{ weightKg: 0, repetitions: 0 }],
+      }],
+    };
+
+    expect(parseProgramInput(input).exercises[0]?.sets[0]?.repetitions).toBe(0);
   });
 });

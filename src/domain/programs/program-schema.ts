@@ -4,7 +4,7 @@ import type { ProgramInput } from './types';
 
 const programSetSchema = z.object({
   weightKg: z.number().finite().min(0),
-  repetitions: z.number().int().min(1).max(1000),
+  repetitions: z.number().int().min(0).max(1000),
 });
 
 const programExerciseSchema = z.object({
