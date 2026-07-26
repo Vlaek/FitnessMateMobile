@@ -6,7 +6,7 @@ export const en = {
   common: {
     save: 'Save', cancel: 'Cancel', close: 'Close', retry: 'Retry', delete: 'Delete',
     edit: 'Edit', duplicate: 'Duplicate', create: 'Create', add: 'Add', done: 'Done',
-    confirm: 'Confirm', moveUp: 'Move up', moveDown: 'Move down', kg: 'kg', lb: 'lb',
+    confirm: 'Confirm', goBack: 'Go back', moveUp: 'Move up', moveDown: 'Move down', kg: 'kg', lb: 'lb',
   },
   nav: { home: 'Home', programs: 'Programs', start: 'Start', history: 'History', progress: 'Progress' },
   app: { loading: 'Loading your data…', databaseError: 'Could not open local data.' },

@@ -1,7 +1,7 @@
 import type { en, TranslationShape } from './en';
 
 export const ru: TranslationShape<typeof en> = {
-  common: { save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', retry: 'Повторить', delete: 'Удалить', edit: 'Изменить', duplicate: 'Копировать', create: 'Создать', add: 'Добавить', done: 'Готово', confirm: 'Подтвердить', moveUp: 'Переместить выше', moveDown: 'Переместить ниже', kg: 'кг', lb: 'фунт' },
+  common: { save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', retry: 'Повторить', delete: 'Удалить', edit: 'Изменить', duplicate: 'Копировать', create: 'Создать', add: 'Добавить', done: 'Готово', confirm: 'Подтвердить', goBack: 'Вернуться назад', moveUp: 'Переместить выше', moveDown: 'Переместить ниже', kg: 'кг', lb: 'фунт' },
   nav: { home: 'Главная', programs: 'Программы', start: 'Старт', history: 'История', progress: 'Прогресс' },
   app: { loading: 'Загружаем данные…', databaseError: 'Не удалось открыть локальные данные.' },
   home: { title: 'FitnessMate', greeting: 'Готовы тренироваться?', noWorkouts: 'Завершённые тренировки появятся здесь.', weeklyVolume: 'Объём за неделю', workouts: 'Тренировки', resumeDraft: 'Продолжить тренировку' },
