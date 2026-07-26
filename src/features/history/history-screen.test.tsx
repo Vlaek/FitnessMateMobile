@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import { reportDraftStore } from '@/features/reports/report-draft-store';
 import { setAppLanguage } from '@/shared/i18n';
-import HistoryScreen from './history';
+import HistoryScreen from '@/app/(tabs)/history';
 
 jest.mock('expo-router', () => {
   const React = jest.requireActual<typeof import('react')>('react');
