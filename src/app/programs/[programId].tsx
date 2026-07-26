@@ -1,5 +1,4 @@
 import { useLocalSearchParams } from 'expo-router';
-
 import { ProgramEditorScreen } from '@/features/programs/editor/program-editor-screen';
 
 export default function EditProgramRoute() {

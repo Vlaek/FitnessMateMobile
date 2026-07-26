@@ -1,9 +1,9 @@
-export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'other';
+export type TMuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'other';
 
-export type Exercise = {
+export type TExercise = {
   id: string;
   builtInKey: string | null;
   customName: string | null;
-  muscleGroup: MuscleGroup;
+  muscleGroup: TMuscleGroup;
   isCustom: boolean;
 };

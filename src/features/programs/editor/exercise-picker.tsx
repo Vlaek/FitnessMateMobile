@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import { exerciseDisplayName } from '@/domain/exercises/display-name';
-import type { Exercise, MuscleGroup } from '@/domain/exercises/types';
+import type { TExercise, TMuscleGroup } from '@/domain/exercises/types';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { Screen } from '@/shared/ui/screen';
 import { TextField } from '@/shared/ui/text-field';
 
-const groups: MuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'other'];
+const groups: TMuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'other'];
 
 export function ExercisePicker({
   visible,
@@ -19,16 +18,16 @@ export function ExercisePicker({
   onCreate,
 }: {
   visible: boolean;
-  exercises: Exercise[];
+  exercises: TExercise[];
   onClose: () => void;
-  onChoose: (exercise: Exercise) => void;
-  onCreate: (name: string, muscleGroup: MuscleGroup) => Promise<Exercise>;
+  onChoose: (exercise: TExercise) => void;
+  onCreate: (name: string, muscleGroup: TMuscleGroup) => Promise<TExercise>;
 }) {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const [search, setSearch] = useState('');
   const [customName, setCustomName] = useState('');
-  const [group, setGroup] = useState<MuscleGroup>('other');
+  const [group, setGroup] = useState<TMuscleGroup>('other');
   const filtered = useMemo(
     () =>
       exercises.filter((item) =>

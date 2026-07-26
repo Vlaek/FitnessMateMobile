@@ -28,4 +28,4 @@ export const darkColors = {
   success: '#4ADE80',
 } as const;
 
-export type AppColors = typeof lightColors | typeof darkColors;
+export type TAppColors = typeof lightColors | typeof darkColors;

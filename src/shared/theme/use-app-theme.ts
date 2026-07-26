@@ -1,7 +1,5 @@
 import { useColorScheme } from 'react-native';
-
 import { usePreferencesStore } from '@/features/settings/preferences-store';
-
 import { darkColors, lightColors } from './colors';
 
 export function useAppTheme() {

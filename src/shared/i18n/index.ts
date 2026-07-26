@@ -1,8 +1,6 @@
 import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
-
-import type { AppLanguage } from '@/features/settings/preferences-store';
-
+import type { TAppLanguage } from '@/features/settings/preferences-store';
 import { en } from './locales/en';
 import { ru } from './locales/ru';
 
@@ -18,7 +16,7 @@ if (!i18n.isInitialized) {
   });
 }
 
-export function setAppLanguage(language: AppLanguage): Promise<unknown> {
+export function setAppLanguage(language: TAppLanguage): Promise<unknown> {
   return i18n.changeLanguage(language);
 }
 

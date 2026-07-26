@@ -2,7 +2,6 @@ import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import {
   clearAllData,
   exportBackup,
@@ -12,7 +11,6 @@ import {
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { Screen } from '@/shared/ui/screen';
-
 import { usePreferencesStore } from './preferences-store';
 
 export function SettingsScreen() {

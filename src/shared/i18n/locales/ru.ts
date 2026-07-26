@@ -1,6 +1,6 @@
-import type { en, TranslationShape } from './en';
+import type { en, TTranslationShape } from './en';
 
-export const ru: TranslationShape<typeof en> = {
+export const ru: TTranslationShape<typeof en> = {
   common: {
     save: 'Сохранить',
     cancel: 'Отмена',

@@ -1,12 +1,10 @@
 import { randomUUID } from 'expo-crypto';
-
 import { parseProgramInput } from '@/domain/programs/program-schema';
-import type { Program, ProgramInput, ProgramSummary } from '@/domain/programs/types';
-
+import type { TProgram, TProgramInput, TProgramSummary } from '@/domain/programs/types';
 import { database } from '../client';
-import type { DatabaseAdapter } from '../types';
+import type { IDatabaseAdapter } from '../types';
 
-type ProgramRow = {
+type TProgramRow = {
   id: string;
   name: string;
   description: string;
@@ -15,47 +13,47 @@ type ProgramRow = {
   updated_at: string;
 };
 
-type ProgramExerciseRow = {
+type TProgramExerciseRow = {
   id: string;
   exercise_id: string;
   sort_order: number;
 };
 
-type ProgramSetRow = {
+type TProgramSetRow = {
   program_exercise_id: string;
   weight_kg: number;
   repetitions: number;
   sort_order: number;
 };
 
-type Dependencies = {
+type TDependencies = {
   createId: () => string;
   now: () => string;
 };
 
-const defaultDependencies: Dependencies = {
+const defaultDependencies: TDependencies = {
   createId: randomUUID,
   now: () => new Date().toISOString(),
 };
 
-export interface ProgramRepository {
-  list(): Promise<ProgramSummary[]>;
-  getById(id: string): Promise<Program | null>;
-  create(input: ProgramInput): Promise<Program>;
-  update(id: string, input: ProgramInput): Promise<Program>;
-  duplicate(id: string): Promise<Program>;
+export interface IProgramRepository {
+  list(): Promise<TProgramSummary[]>;
+  getById(id: string): Promise<TProgram | null>;
+  create(input: TProgramInput): Promise<TProgram>;
+  update(id: string, input: TProgramInput): Promise<TProgram>;
+  duplicate(id: string): Promise<TProgram>;
   reorder(orderedIds: string[]): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
-export class SqliteProgramRepository implements ProgramRepository {
+export class SqliteProgramRepository implements IProgramRepository {
   constructor(
-    private readonly db: DatabaseAdapter = database,
-    private readonly dependencies: Dependencies = defaultDependencies,
+    private readonly db: IDatabaseAdapter = database,
+    private readonly dependencies: TDependencies = defaultDependencies,
   ) {}
 
-  async list(): Promise<ProgramSummary[]> {
-    return this.db.getAllAsync<ProgramSummary>(
+  async list(): Promise<TProgramSummary[]> {
+    return this.db.getAllAsync<TProgramSummary>(
       `SELECT p.id, p.name, p.description, p.sort_order AS sortOrder,
               COUNT(DISTINCT pe.id) AS exerciseCount,
               COUNT(ps.id) AS setCount
@@ -67,8 +65,8 @@ export class SqliteProgramRepository implements ProgramRepository {
     );
   }
 
-  async getById(id: string): Promise<Program | null> {
-    const row = await this.db.getFirstAsync<ProgramRow>(
+  async getById(id: string): Promise<TProgram | null> {
+    const row = await this.db.getFirstAsync<TProgramRow>(
       `SELECT id, name, description, sort_order, created_at, updated_at
        FROM programs WHERE id = ?`,
       [id],
@@ -78,12 +76,12 @@ export class SqliteProgramRepository implements ProgramRepository {
       return null;
     }
 
-    const exerciseRows = await this.db.getAllAsync<ProgramExerciseRow>(
+    const exerciseRows = await this.db.getAllAsync<TProgramExerciseRow>(
       `SELECT id, exercise_id, sort_order FROM program_exercises
        WHERE program_id = ? ORDER BY sort_order ASC`,
       [id],
     );
-    const setRows = await this.db.getAllAsync<ProgramSetRow>(
+    const setRows = await this.db.getAllAsync<TProgramSetRow>(
       `SELECT ps.program_exercise_id, ps.weight_kg, ps.repetitions, ps.sort_order
        FROM program_sets ps
        INNER JOIN program_exercises pe ON pe.id = ps.program_exercise_id
@@ -108,7 +106,7 @@ export class SqliteProgramRepository implements ProgramRepository {
     };
   }
 
-  async create(rawInput: ProgramInput): Promise<Program> {
+  async create(rawInput: TProgramInput): Promise<TProgram> {
     const input = parseProgramInput(rawInput);
     const id = this.dependencies.createId();
     const timestamp = this.dependencies.now();
@@ -129,12 +127,12 @@ export class SqliteProgramRepository implements ProgramRepository {
     return { id, sortOrder, createdAt: timestamp, updatedAt: timestamp, ...input };
   }
 
-  async update(id: string, rawInput: ProgramInput): Promise<Program> {
+  async update(id: string, rawInput: TProgramInput): Promise<TProgram> {
     const input = parseProgramInput(rawInput);
     const existing = await this.getById(id);
 
     if (!existing) {
-      throw new Error('Program not found');
+      throw new Error('TProgram not found');
     }
 
     const updatedAt = this.dependencies.now();
@@ -151,11 +149,11 @@ export class SqliteProgramRepository implements ProgramRepository {
     return { ...existing, ...input, updatedAt };
   }
 
-  async duplicate(id: string): Promise<Program> {
+  async duplicate(id: string): Promise<TProgram> {
     const source = await this.getById(id);
 
     if (!source) {
-      throw new Error('Program not found');
+      throw new Error('TProgram not found');
     }
 
     return this.create({
@@ -167,14 +165,14 @@ export class SqliteProgramRepository implements ProgramRepository {
 
   async reorder(orderedIds: string[]): Promise<void> {
     if (new Set(orderedIds).size !== orderedIds.length) {
-      throw new Error('Program order contains duplicate IDs');
+      throw new Error('TProgram order contains duplicate IDs');
     }
 
     const rows = await this.db.getAllAsync<{ id: string }>('SELECT id FROM programs');
     const storedIds = new Set(rows.map((row) => row.id));
 
     if (storedIds.size !== orderedIds.length || orderedIds.some((id) => !storedIds.has(id))) {
-      throw new Error('Program order must contain every program exactly once');
+      throw new Error('TProgram order must contain every program exactly once');
     }
 
     await this.db.withTransactionAsync(async () => {
@@ -188,7 +186,7 @@ export class SqliteProgramRepository implements ProgramRepository {
     await this.db.runAsync('DELETE FROM programs WHERE id = ?', [id]);
   }
 
-  private async insertChildren(programId: string, input: ProgramInput): Promise<void> {
+  private async insertChildren(programId: string, input: TProgramInput): Promise<void> {
     for (const [exerciseIndex, exercise] of input.exercises.entries()) {
       const programExerciseId = this.dependencies.createId();
       await this.db.runAsync(

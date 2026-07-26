@@ -3,6 +3,12 @@ const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 
 const controlFlow = ['if', 'for', 'while', 'do', 'switch', 'try'];
+const typeLikeDeclaration = [
+  'type',
+  'interface',
+  { selector: "ExportNamedDeclaration[declaration.type='TSTypeAliasDeclaration']" },
+  { selector: "ExportNamedDeclaration[declaration.type='TSInterfaceDeclaration']" },
+];
 
 module.exports = defineConfig([
   ...expoConfig,
@@ -31,8 +37,8 @@ module.exports = defineConfig([
         { blankLine: 'never', prev: 'import', next: 'import' },
         {
           blankLine: 'always',
-          prev: ['type', 'interface'],
-          next: ['type', 'interface'],
+          prev: typeLikeDeclaration,
+          next: typeLikeDeclaration,
         },
         { blankLine: 'always', prev: '*', next: [...controlFlow, 'return'] },
         { blankLine: 'always', prev: controlFlow, next: '*' },

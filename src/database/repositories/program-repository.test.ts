@@ -1,10 +1,8 @@
 import { FakeDatabase } from '@/test/fake-database';
-
-import type { ProgramInput } from '@/domain/programs/types';
-
+import type { TProgramInput } from '@/domain/programs/types';
 import { SqliteProgramRepository } from './program-repository';
 
-const input: ProgramInput = {
+const input: TProgramInput = {
   name: 'Upper body',
   description: 'Monday',
   exercises: [
@@ -102,7 +100,7 @@ describe('SqliteProgramRepository', () => {
   it('rejects duplicate IDs during reorder', async () => {
     const repository = makeRepository(new FakeDatabase());
     await expect(repository.reorder(['same', 'same'])).rejects.toThrow(
-      'Program order contains duplicate IDs',
+      'TProgram order contains duplicate IDs',
     );
   });
 });

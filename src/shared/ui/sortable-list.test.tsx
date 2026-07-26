@@ -1,6 +1,5 @@
 import { render } from '@testing-library/react-native';
 import { Text } from 'react-native';
-
 import { SortableList } from './sortable-list';
 
 describe('SortableList', () => {

@@ -1,11 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { GestureDetector } from 'react-native-gesture-handler';
-
-import type { ProgramSummary } from '@/domain/programs/types';
+import type { TProgramSummary } from '@/domain/programs/types';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
-import type { SortableDragGesture } from '@/shared/ui/sortable-list';
+import type { TSortableDragGesture } from '@/shared/ui/sortable-list';
 
 export function ProgramCard({
   program,
@@ -13,10 +12,10 @@ export function ProgramCard({
   onDelete,
   dragGesture,
 }: {
-  program: ProgramSummary;
+  program: TProgramSummary;
   onOpen: () => void;
   onDelete: () => void;
-  dragGesture?: SortableDragGesture;
+  dragGesture?: TSortableDragGesture;
 }) {
   const { t } = useTranslation();
   const { colors } = useAppTheme();

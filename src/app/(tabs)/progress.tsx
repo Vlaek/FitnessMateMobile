@@ -2,13 +2,12 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import { database } from '@/database/client';
 import { fromCanonicalKg } from '@/domain/units/weight';
 import {
   calculateAnalytics,
-  type Analytics,
-  type CompletedSetRow,
+  type TAnalytics,
+  type TCompletedSetRow,
 } from '@/features/analytics/analytics';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
@@ -20,11 +19,11 @@ export default function ProgressScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const unit = usePreferencesStore((s) => s.weightUnit);
-  const [data, setData] = useState<Analytics | null>(null);
+  const [data, setData] = useState<TAnalytics | null>(null);
   useFocusEffect(
     useCallback(() => {
       void database
-        .getAllAsync<CompletedSetRow>(
+        .getAllAsync<TCompletedSetRow>(
           `SELECT w.id AS workoutId, w.completed_at AS completedAt, we.exercise_name AS exerciseName, ws.weight_kg AS weightKg, ws.repetitions FROM workout_sets ws JOIN workout_exercises we ON we.id = ws.workout_exercise_id JOIN workouts w ON w.id = we.workout_id WHERE w.status = 'completed' AND ws.is_completed = 1 ORDER BY w.completed_at`,
         )
         .then((rows) => setData(calculateAnalytics(rows)));

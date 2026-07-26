@@ -14,6 +14,10 @@
 
 **Files:**
 - Modify: `eslint.config.js`
+- Modify: `package.json`
+- Modify: `package-lock.json`
+- Modify: `tsconfig.json`
+- Test: `src/test/eslint-config.test.ts`
 
 - [ ] **Step 1: Добавить правила**
 
@@ -35,6 +39,17 @@
 ],
 ```
 
+Добавить селектор, который учитывает обычные и экспортированные объявления:
+
+```js
+const typeLikeDeclaration = [
+  'type',
+  'interface',
+  { selector: "ExportNamedDeclaration[declaration.type='TSTypeAliasDeclaration']" },
+  { selector: "ExportNamedDeclaration[declaration.type='TSInterfaceDeclaration']" },
+];
+```
+
 Начало `@stylistic/padding-line-between-statements` привести к виду:
 
 ```js
@@ -43,8 +58,8 @@
   { blankLine: 'never', prev: 'import', next: 'import' },
   {
     blankLine: 'always',
-    prev: ['type', 'interface'],
-    next: ['type', 'interface'],
+    prev: typeLikeDeclaration,
+    next: typeLikeDeclaration,
   },
   { blankLine: 'always', prev: '*', next: [...controlFlow, 'return'] },
   { blankLine: 'always', prev: controlFlow, next: '*' },
@@ -61,10 +76,17 @@ npm.cmd run lint
 
 Expected: FAIL на существующих именах без `I`/`T` и пустых строках между импортами.
 
-- [ ] **Step 3: Зафиксировать правила**
+- [ ] **Step 3: Добавить regression-тест экспортированных типов**
+
+`src/test/eslint-config.test.ts` запускает локальный ESLint через
+`node_modules/eslint/bin/eslint.js` и проверяет сообщение `expectedBlankLine` для
+двух соседних `export type`. Добавить `@types/node` и тип `node` в `tsconfig.json`
+для типизации запуска CLI.
+
+- [ ] **Step 4: Зафиксировать правила**
 
 ```powershell
-git add eslint.config.js
+git add eslint.config.js package.json package-lock.json tsconfig.json src/test/eslint-config.test.ts
 git commit -m "chore: enforce type naming and spacing"
 ```
 

@@ -1,5 +1,5 @@
-export type TranslationShape<T> = {
-  [Key in keyof T]: T[Key] extends string ? string : TranslationShape<T[Key]>;
+export type TTranslationShape<T> = {
+  [Key in keyof T]: T[Key] extends string ? string : TTranslationShape<T[Key]>;
 };
 
 export const en = {
@@ -42,14 +42,14 @@ export const en = {
     emptyTitle: 'No programs yet',
     emptyBody: 'Create a reusable workout program.',
     new: 'New program',
-    name: 'Program name',
+    name: 'TProgram name',
     description: 'Description',
     exercises: 'Exercises',
     sets: 'sets',
     exerciseCount: 'exercises',
     deleteTitle: 'Delete program?',
-    deleteBody: 'The program will be removed. Workout history stays unchanged.',
-    notFound: 'Program not found.',
+    deleteBody: 'The program will be removed. TWorkout history stays unchanged.',
+    notFound: 'TProgram not found.',
     nameRequired: 'Enter a program name.',
     exerciseRequired: 'Add at least one exercise.',
     remove: 'Delete program',
@@ -67,7 +67,7 @@ export const en = {
     chooseExercise: 'Choose exercise',
     searchExercise: 'Search exercises',
     customExercise: 'Create custom exercise',
-    customName: 'Exercise name',
+    customName: 'TExercise name',
     muscleGroup: 'Muscle group',
     reorderHint: 'Long press and drag to change exercise order',
   },
@@ -75,10 +75,10 @@ export const en = {
     title: 'Start workout',
     choose: 'Choose a program or start an empty workout.',
     emptyWorkout: 'Empty workout',
-    unfinished: 'Workout tracking is available in the next build step.',
+    unfinished: 'TWorkout tracking is available in the next build step.',
   },
   workout: {
-    defaultName: 'Workout',
+    defaultName: 'TWorkout',
     noActive: 'No active workout',
     finish: 'Finish workout',
     finishTitle: 'Finish workout?',

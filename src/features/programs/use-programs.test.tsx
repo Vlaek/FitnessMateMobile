@@ -1,8 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
-
-import type { ProgramRepository } from '@/database/repositories/program-repository';
-import type { ProgramSummary } from '@/domain/programs/types';
-
+import type { IProgramRepository } from '@/database/repositories/program-repository';
+import type { TProgramSummary } from '@/domain/programs/types';
 import { usePrograms } from './use-programs';
 
 jest.mock('expo-router', () => ({
@@ -12,13 +10,13 @@ jest.mock('expo-router', () => ({
   },
 }));
 
-const programs: ProgramSummary[] = [
+const programs: TProgramSummary[] = [
   { id: 'a', name: 'A', description: '', sortOrder: 0, exerciseCount: 1, setCount: 1 },
   { id: 'b', name: 'B', description: '', sortOrder: 1, exerciseCount: 1, setCount: 1 },
   { id: 'c', name: 'C', description: '', sortOrder: 2, exerciseCount: 1, setCount: 1 },
 ];
 
-function createRepository(reorder: ProgramRepository['reorder']): ProgramRepository {
+function createRepository(reorder: IProgramRepository['reorder']): IProgramRepository {
   return {
     list: jest.fn().mockResolvedValue(programs),
     getById: jest.fn(),

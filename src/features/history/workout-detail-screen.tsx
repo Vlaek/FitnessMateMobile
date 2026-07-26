@@ -2,10 +2,9 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
-import type { Workout } from '@/domain/workouts/types';
+import type { TWorkout } from '@/domain/workouts/types';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
@@ -18,8 +17,8 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const unit = usePreferencesStore((state) => state.weightUnit);
-  const [workout, setWorkout] = useState<Workout | null>(null);
-  const [draft, setDraft] = useState<Workout | null>(null);
+  const [workout, setWorkout] = useState<TWorkout | null>(null);
+  const [draft, setDraft] = useState<TWorkout | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -95,7 +94,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
 
   const setExercise = (
     index: number,
-    transform: (value: Workout['exercises'][number]) => Workout['exercises'][number],
+    transform: (value: TWorkout['exercises'][number]) => TWorkout['exercises'][number],
   ) => {
     if (!draft) {
       return;
@@ -246,7 +245,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
   );
 }
 
-function cloneWorkout(workout: Workout): Workout {
+function cloneWorkout(workout: TWorkout): TWorkout {
   return {
     ...workout,
     exercises: workout.exercises.map((exercise) => ({

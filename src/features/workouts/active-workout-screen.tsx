@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import { exerciseDisplayName } from '@/domain/exercises/display-name';
 import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
 import { exerciseRepository } from '@/database/repositories/exercise-repository';
@@ -15,7 +14,6 @@ import { EmptyState } from '@/shared/ui/empty-state';
 import { LoadingScreen } from '@/shared/ui/loading-screen';
 import { Screen } from '@/shared/ui/screen';
 import { TextField } from '@/shared/ui/text-field';
-
 import { ExercisePicker } from '../programs/editor/exercise-picker';
 import { useActiveWorkout } from './use-active-workout';
 

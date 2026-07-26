@@ -1,5 +1,4 @@
 import { fireEvent, render } from '@testing-library/react-native';
-
 import { NumericField } from './numeric-field';
 
 describe('NumericField', () => {

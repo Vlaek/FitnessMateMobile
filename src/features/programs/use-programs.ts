@@ -1,15 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-
-import type { ProgramSummary } from '@/domain/programs/types';
+import type { TProgramSummary } from '@/domain/programs/types';
 import {
   programRepository,
-  type ProgramRepository,
+  type IProgramRepository,
 } from '@/database/repositories/program-repository';
 import { moveItem } from '@/shared/lib/reorder';
 
-export function usePrograms(repository: ProgramRepository = programRepository) {
-  const [items, setItems] = useState<ProgramSummary[]>([]);
+export function usePrograms(repository: IProgramRepository = programRepository) {
+  const [items, setItems] = useState<TProgramSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isReordering, setIsReordering] = useState(false);
   const [error, setError] = useState<string | null>(null);

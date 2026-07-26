@@ -1,6 +1,5 @@
 import { z } from 'zod';
-
-import type { ProgramInput } from './types';
+import type { TProgramInput } from './types';
 
 const programSetSchema = z.object({
   weightKg: z.number().finite().min(0),
@@ -18,6 +17,6 @@ const programInputSchema = z.object({
   exercises: z.array(programExerciseSchema).min(1),
 });
 
-export function parseProgramInput(input: unknown): ProgramInput {
+export function parseProgramInput(input: unknown): TProgramInput {
   return programInputSchema.parse(input);
 }

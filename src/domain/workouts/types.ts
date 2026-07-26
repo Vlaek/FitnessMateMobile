@@ -1,19 +1,21 @@
-import type { MuscleGroup } from '@/domain/exercises/types';
+import type { TMuscleGroup } from '@/domain/exercises/types';
 
-export type WorkoutSet = {
+export type TWorkoutSet = {
   id: string;
   weightKg: number;
   repetitions: number;
   isCompleted: boolean;
 };
-export type WorkoutExercise = {
+
+export type TWorkoutExercise = {
   id: string;
   sourceExerciseId: string | null;
   exerciseName: string;
-  muscleGroup: MuscleGroup;
-  sets: WorkoutSet[];
+  muscleGroup: TMuscleGroup;
+  sets: TWorkoutSet[];
 };
-export type Workout = {
+
+export type TWorkout = {
   id: string;
   sourceProgramId: string | null;
   name: string;
@@ -21,9 +23,10 @@ export type Workout = {
   startedAt: string;
   completedAt: string | null;
   updatedAt: string;
-  exercises: WorkoutExercise[];
+  exercises: TWorkoutExercise[];
 };
-export type WorkoutSummary = {
+
+export type TWorkoutSummary = {
   id: string;
   name: string;
   startedAt: string;

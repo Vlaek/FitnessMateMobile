@@ -1,14 +1,12 @@
 import { router } from 'expo-router';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { AppHeader } from '@/shared/ui/app-header';
 import { Button } from '@/shared/ui/button';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Screen } from '@/shared/ui/screen';
 import { SortableList } from '@/shared/ui/sortable-list';
-
 import { ProgramCard } from './program-card';
 import { usePrograms } from './use-programs';
 

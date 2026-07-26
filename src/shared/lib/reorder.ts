@@ -1,4 +1,4 @@
-export type ItemLayout = {
+export type TItemLayout = {
   y: number;
   height: number;
 };
@@ -23,7 +23,7 @@ export function moveItem<T>(items: readonly T[], from: number, to: number): read
 export function targetIndexForDrag(
   from: number,
   translatedCenterY: number,
-  layouts: readonly ItemLayout[],
+  layouts: readonly TItemLayout[],
 ): number {
   if (!layouts[from] || layouts.length === 0) {
     return from;

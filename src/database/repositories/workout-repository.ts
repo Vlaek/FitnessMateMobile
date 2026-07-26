@@ -1,15 +1,13 @@
 import { randomUUID } from 'expo-crypto';
-
-import type { MuscleGroup } from '@/domain/exercises/types';
-import type { Workout, WorkoutSummary } from '@/domain/workouts/types';
-
+import type { TMuscleGroup } from '@/domain/exercises/types';
+import type { TWorkout, TWorkoutSummary } from '@/domain/workouts/types';
 import { database } from '../client';
-import type { DatabaseAdapter } from '../types';
+import type { IDatabaseAdapter } from '../types';
 
-type Dependencies = { createId: () => string; now: () => string };
-const dependencies: Dependencies = { createId: randomUUID, now: () => new Date().toISOString() };
+type TDependencies = { createId: () => string; now: () => string };
+const dependencies: TDependencies = { createId: randomUUID, now: () => new Date().toISOString() };
 
-type WorkoutRow = {
+type TWorkoutRow = {
   id: string;
   source_program_id: string | null;
   name: string;
@@ -18,14 +16,16 @@ type WorkoutRow = {
   completed_at: string | null;
   updated_at: string;
 };
-type ExerciseRow = {
+
+type TExerciseRow = {
   id: string;
   source_exercise_id: string | null;
   exercise_name: string;
-  muscle_group: MuscleGroup;
+  muscle_group: TMuscleGroup;
   sort_order: number;
 };
-type SetRow = {
+
+type TSetRow = {
   id: string;
   workout_exercise_id: string;
   weight_kg: number;
@@ -33,32 +33,33 @@ type SetRow = {
   is_completed: 0 | 1;
   sort_order: number;
 };
-type ProgramTemplateRow = {
+
+type TProgramTemplateRow = {
   program_name: string;
   exercise_id: string;
   exercise_name: string;
-  muscle_group: MuscleGroup;
+  muscle_group: TMuscleGroup;
   exercise_order: number;
   weight_kg: number;
   repetitions: number;
   set_order: number;
 };
 
-export interface WorkoutRepository {
-  getActive(): Promise<Workout | null>;
-  startEmpty(name: string): Promise<Workout>;
-  startFromProgram(programId: string): Promise<Workout>;
-  save(workout: Workout): Promise<void>;
+export interface IWorkoutRepository {
+  getActive(): Promise<TWorkout | null>;
+  startEmpty(name: string): Promise<TWorkout>;
+  startFromProgram(programId: string): Promise<TWorkout>;
+  save(workout: TWorkout): Promise<void>;
   complete(id: string): Promise<void>;
-  getById(id: string): Promise<Workout | null>;
-  listCompleted(): Promise<WorkoutSummary[]>;
+  getById(id: string): Promise<TWorkout | null>;
+  listCompleted(): Promise<TWorkoutSummary[]>;
   delete(id: string): Promise<void>;
 }
 
-export class SqliteWorkoutRepository implements WorkoutRepository {
+export class SqliteWorkoutRepository implements IWorkoutRepository {
   constructor(
-    private readonly db: DatabaseAdapter = database,
-    private readonly deps: Dependencies = dependencies,
+    private readonly db: IDatabaseAdapter = database,
+    private readonly deps: TDependencies = dependencies,
   ) {}
 
   async getActive() {
@@ -69,13 +70,13 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
     return row ? this.getById(row.id) : null;
   }
 
-  async startEmpty(name: string): Promise<Workout> {
+  async startEmpty(name: string): Promise<TWorkout> {
     await this.assertNoActive();
     const timestamp = this.deps.now();
-    const workout: Workout = {
+    const workout: TWorkout = {
       id: this.deps.createId(),
       sourceProgramId: null,
-      name: name.trim() || 'Workout',
+      name: name.trim() || 'TWorkout',
       status: 'draft',
       startedAt: timestamp,
       completedAt: null,
@@ -89,9 +90,9 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
     return workout;
   }
 
-  async startFromProgram(programId: string): Promise<Workout> {
+  async startFromProgram(programId: string): Promise<TWorkout> {
     await this.assertNoActive();
-    const rows = await this.db.getAllAsync<ProgramTemplateRow>(
+    const rows = await this.db.getAllAsync<TProgramTemplateRow>(
       `SELECT p.name AS program_name, e.id AS exercise_id,
               COALESCE(e.custom_name, e.built_in_key) AS exercise_name,
               e.muscle_group, pe.sort_order AS exercise_order,
@@ -105,11 +106,11 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
     );
 
     if (!rows.length) {
-      throw new Error('Program not found or empty');
+      throw new Error('TProgram not found or empty');
     }
 
     const timestamp = this.deps.now();
-    const workout: Workout = {
+    const workout: TWorkout = {
       id: this.deps.createId(),
       sourceProgramId: programId,
       name: rows[0]!.program_name,
@@ -150,7 +151,7 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
     return workout;
   }
 
-  async save(workout: Workout): Promise<void> {
+  async save(workout: TWorkout): Promise<void> {
     const updatedAt = this.deps.now();
     await this.db.withTransactionAsync(async () => {
       await this.db.runAsync('UPDATE workouts SET name = ?, updated_at = ? WHERE id = ?', [
@@ -174,8 +175,8 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
     await this.db.runAsync('DELETE FROM workouts WHERE id = ?', [id]);
   }
 
-  async getById(id: string): Promise<Workout | null> {
-    const row = await this.db.getFirstAsync<WorkoutRow>('SELECT * FROM workouts WHERE id = ?', [
+  async getById(id: string): Promise<TWorkout | null> {
+    const row = await this.db.getFirstAsync<TWorkoutRow>('SELECT * FROM workouts WHERE id = ?', [
       id,
     ]);
 
@@ -183,11 +184,11 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
       return null;
     }
 
-    const exercises = await this.db.getAllAsync<ExerciseRow>(
+    const exercises = await this.db.getAllAsync<TExerciseRow>(
       'SELECT id, source_exercise_id, exercise_name, muscle_group, sort_order FROM workout_exercises WHERE workout_id = ? ORDER BY sort_order',
       [id],
     );
-    const sets = await this.db.getAllAsync<SetRow>(
+    const sets = await this.db.getAllAsync<TSetRow>(
       'SELECT ws.* FROM workout_sets ws JOIN workout_exercises we ON we.id = ws.workout_exercise_id WHERE we.workout_id = ? ORDER BY we.sort_order, ws.sort_order',
       [id],
     );
@@ -217,9 +218,9 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
     };
   }
 
-  async listCompleted(): Promise<WorkoutSummary[]> {
+  async listCompleted(): Promise<TWorkoutSummary[]> {
     return this.db
-      .getAllAsync<WorkoutSummary>(`SELECT w.id, w.name, w.started_at AS startedAt, w.completed_at AS completedAt,
+      .getAllAsync<TWorkoutSummary>(`SELECT w.id, w.name, w.started_at AS startedAt, w.completed_at AS completedAt,
       COUNT(DISTINCT we.id) AS exerciseCount, COUNT(ws.id) AS setCount,
       COALESCE(SUM(ws.weight_kg * ws.repetitions), 0) AS volumeKg
       FROM workouts w LEFT JOIN workout_exercises we ON we.workout_id = w.id
@@ -232,7 +233,7 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
       throw new Error('Active workout already exists');
     }
   }
-  private async insertWorkout(workout: Workout) {
+  private async insertWorkout(workout: TWorkout) {
     await this.db.runAsync(
       'INSERT INTO workouts (id, source_program_id, name, status, started_at, completed_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
@@ -246,7 +247,7 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
       ],
     );
   }
-  private async insertChildren(workout: Workout) {
+  private async insertChildren(workout: TWorkout) {
     for (const [exerciseIndex, exercise] of workout.exercises.entries()) {
       await this.db.runAsync(
         'INSERT INTO workout_exercises (id, workout_id, source_exercise_id, exercise_name, muscle_group, sort_order) VALUES (?, ?, ?, ?, ?, ?)',

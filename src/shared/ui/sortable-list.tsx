@@ -8,16 +8,15 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { moveItem, targetIndexForDrag, type TItemLayout } from '@/shared/lib/reorder';
 
-import { moveItem, targetIndexForDrag, type ItemLayout } from '@/shared/lib/reorder';
+export type TSortableDragGesture = GestureType;
 
-export type SortableDragGesture = GestureType;
-
-type Props<T> = {
+type TProps<T> = {
   data: readonly T[];
   keyExtractor: (item: T) => string;
   onReorder: (from: number, to: number) => void;
-  renderItem: (item: T, index: number, dragGesture: SortableDragGesture) => ReactNode;
+  renderItem: (item: T, index: number, dragGesture: TSortableDragGesture) => ReactNode;
   accessibilityHint?: string;
   disabled?: boolean;
   gap?: number;
@@ -31,8 +30,8 @@ export function SortableList<T>({
   accessibilityHint = 'Long press and drag to change position',
   disabled = false,
   gap = 14,
-}: Props<T>) {
-  const layouts = useRef<ItemLayout[]>([]);
+}: TProps<T>) {
+  const layouts = useRef<TItemLayout[]>([]);
   const previewRef = useRef<readonly T[]>(data);
   const sourceIndex = useRef(0);
   const targetIndex = useRef(0);
@@ -147,8 +146,8 @@ function SortableRow({
   onDrag: (translationY: number) => void;
   onDragStart: () => void;
   onDrop: () => void;
-  onLayout: (layout: ItemLayout) => void;
-  renderItem: (dragGesture: SortableDragGesture) => ReactNode;
+  onLayout: (layout: TItemLayout) => void;
+  renderItem: (dragGesture: TSortableDragGesture) => ReactNode;
   testID: string;
 }) {
   const translateY = useSharedValue(0);

@@ -1,15 +1,15 @@
-import type { MuscleGroup } from '@/domain/exercises/types';
+import type { TMuscleGroup } from '@/domain/exercises/types';
 
-export type BuiltInExerciseSeed = {
+export type TBuiltInExerciseSeed = {
   id: string;
   builtInKey: string;
-  muscleGroup: MuscleGroup;
+  muscleGroup: TMuscleGroup;
   createdAt: string;
 };
 
 const SEEDED_AT = '2026-01-01T00:00:00.000Z';
 
-export const BUILT_IN_EXERCISES: BuiltInExerciseSeed[] = [
+export const BUILT_IN_EXERCISES: TBuiltInExerciseSeed[] = [
   ['00000000-0000-4000-8000-000000000001', 'barbellBenchPress', 'chest'],
   ['00000000-0000-4000-8000-000000000002', 'squat', 'legs'],
   ['00000000-0000-4000-8000-000000000003', 'deadlift', 'back'],
@@ -23,6 +23,6 @@ export const BUILT_IN_EXERCISES: BuiltInExerciseSeed[] = [
 ].map(([id, builtInKey, muscleGroup]) => ({
   id,
   builtInKey,
-  muscleGroup: muscleGroup as MuscleGroup,
+  muscleGroup: muscleGroup as TMuscleGroup,
   createdAt: SEEDED_AT,
 }));

@@ -69,7 +69,7 @@ export const backupSchema = z.object({
   workoutExercises: z.array(workoutExercise),
   workoutSets: z.array(workoutSet),
 });
-export type FitnessMateBackup = z.infer<typeof backupSchema>;
-export function parseBackup(value: unknown): FitnessMateBackup {
+export type TFitnessMateBackup = z.infer<typeof backupSchema>;
+export function parseBackup(value: unknown): TFitnessMateBackup {
   return backupSchema.parse(value);
 }

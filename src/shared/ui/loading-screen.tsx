@@ -1,6 +1,5 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 
 export function LoadingScreen() {

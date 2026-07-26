@@ -1,8 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { Text } from 'react-native';
-
 import { bootstrapDatabase } from '@/database/bootstrap';
-
 import { AppProviders } from './app-providers';
 
 jest.mock('@/database/bootstrap', () => ({

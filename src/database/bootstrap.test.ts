@@ -1,5 +1,4 @@
 import { FakeDatabase } from '@/test/fake-database';
-
 import { bootstrapDatabase } from './bootstrap';
 import { BUILT_IN_EXERCISES } from './seed/built-in-exercises';
 

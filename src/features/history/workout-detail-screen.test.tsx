@@ -1,10 +1,8 @@
 import { fireEvent, render } from '@testing-library/react-native';
-
 import { workoutRepository } from '@/database/repositories/workout-repository';
-import type { Workout } from '@/domain/workouts/types';
+import type { TWorkout } from '@/domain/workouts/types';
 import { preferencesStore } from '@/features/settings/preferences-store';
 import { setAppLanguage } from '@/shared/i18n';
-
 import { WorkoutDetailScreen } from './workout-detail-screen';
 
 jest.mock('expo-router', () => ({
@@ -19,7 +17,7 @@ jest.mock('@/database/repositories/workout-repository', () => ({
   },
 }));
 
-const workout: Workout = {
+const workout: TWorkout = {
   id: 'workout-1',
   sourceProgramId: null,
   name: 'Bench day',

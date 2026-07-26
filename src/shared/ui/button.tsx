@@ -1,8 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 
-type Props = PressableProps & {
+type TProps = PressableProps & {
   label: string;
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
   loading?: boolean;
@@ -15,7 +14,7 @@ export function Button({
   disabled,
   style,
   ...props
-}: Props) {
+}: TProps) {
   const { colors } = useAppTheme();
   const palette =
     variant === 'primary'

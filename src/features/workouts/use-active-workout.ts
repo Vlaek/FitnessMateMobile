@@ -1,14 +1,13 @@
 import { randomUUID } from 'expo-crypto';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-import type { Exercise } from '@/domain/exercises/types';
-import type { Workout } from '@/domain/workouts/types';
+import type { TExercise } from '@/domain/exercises/types';
+import type { TWorkout } from '@/domain/workouts/types';
 import { exerciseRepository } from '@/database/repositories/exercise-repository';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 
 export function useActiveWorkout() {
-  const [workout, setWorkoutState] = useState<Workout | null>(null);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [workout, setWorkoutState] = useState<TWorkout | null>(null);
+  const [exercises, setExercises] = useState<TExercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const saveQueue = useRef(Promise.resolve());
@@ -23,7 +22,7 @@ export function useActiveWorkout() {
       .catch((cause) => setError(String(cause)))
       .finally(() => setLoading(false));
   }, []);
-  const setWorkout = useCallback((next: Workout) => {
+  const setWorkout = useCallback((next: TWorkout) => {
     setWorkoutState(next);
 
     if (!initialized.current) {
@@ -34,7 +33,7 @@ export function useActiveWorkout() {
       .then(() => workoutRepository.save(next))
       .catch((cause) => setError(String(cause)));
   }, []);
-  const addExercise = (exercise: Exercise, displayName: string) => {
+  const addExercise = (exercise: TExercise, displayName: string) => {
     if (!workout) {
       return;
     }

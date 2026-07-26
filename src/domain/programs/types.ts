@@ -1,27 +1,27 @@
-export type ProgramSetInput = {
+export type TProgramSetInput = {
   weightKg: number;
   repetitions: number;
 };
 
-export type ProgramExerciseInput = {
+export type TProgramExerciseInput = {
   exerciseId: string;
-  sets: ProgramSetInput[];
+  sets: TProgramSetInput[];
 };
 
-export type ProgramInput = {
+export type TProgramInput = {
   name: string;
   description: string;
-  exercises: ProgramExerciseInput[];
+  exercises: TProgramExerciseInput[];
 };
 
-export type Program = ProgramInput & {
+export type TProgram = TProgramInput & {
   id: string;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
 };
 
-export type ProgramSummary = {
+export type TProgramSummary = {
   id: string;
   name: string;
   description: string;

@@ -1,13 +1,13 @@
-import type { DatabaseAdapter, SqlParams, SqlRunResult } from '@/database/types';
+import type { IDatabaseAdapter, TSqlParams, TSqlRunResult } from '@/database/types';
 
-export type RecordedQuery = {
+export type TRecordedQuery = {
   sql: string;
-  params: SqlParams;
+  params: TSqlParams;
 };
 
-export class FakeDatabase implements DatabaseAdapter {
+export class FakeDatabase implements IDatabaseAdapter {
   executedSql: string[] = [];
-  queries: RecordedQuery[] = [];
+  queries: TRecordedQuery[] = [];
   userVersion: number;
   transactionCount = 0;
   committedTransactions = 0;
@@ -40,13 +40,13 @@ export class FakeDatabase implements DatabaseAdapter {
     }
   }
 
-  async runAsync(sql: string, params: SqlParams = []): Promise<SqlRunResult> {
+  async runAsync(sql: string, params: TSqlParams = []): Promise<TSqlRunResult> {
     this.record(sql, params);
 
     return { changes: 1, lastInsertRowId: 1 };
   }
 
-  async getFirstAsync<T>(sql: string, params: SqlParams = []): Promise<T | null> {
+  async getFirstAsync<T>(sql: string, params: TSqlParams = []): Promise<T | null> {
     this.record(sql, params);
 
     if (/PRAGMA user_version/i.test(sql)) {
@@ -56,7 +56,7 @@ export class FakeDatabase implements DatabaseAdapter {
     return (this.firstResults.shift() as T | null | undefined) ?? null;
   }
 
-  async getAllAsync<T>(sql: string, params: SqlParams = []): Promise<T[]> {
+  async getAllAsync<T>(sql: string, params: TSqlParams = []): Promise<T[]> {
     this.record(sql, params);
 
     return (this.allResults.shift() as T[] | undefined) ?? [];
@@ -68,7 +68,7 @@ export class FakeDatabase implements DatabaseAdapter {
     this.committedTransactions += 1;
   }
 
-  private record(sql: string, params: SqlParams): void {
+  private record(sql: string, params: TSqlParams): void {
     if (this.failPattern && sql.includes(this.failPattern)) {
       throw new Error(`Forced SQL failure: ${this.failPattern}`);
     }

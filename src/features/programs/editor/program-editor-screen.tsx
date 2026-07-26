@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { GestureDetector } from 'react-native-gesture-handler';
-
 import { exerciseDisplayName } from '@/domain/exercises/display-name';
 import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
@@ -15,7 +14,6 @@ import { NumericField } from '@/shared/ui/numeric-field';
 import { Screen } from '@/shared/ui/screen';
 import { SortableList } from '@/shared/ui/sortable-list';
 import { TextField } from '@/shared/ui/text-field';
-
 import { ExercisePicker } from './exercise-picker';
 import {
   addExercise,

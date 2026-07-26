@@ -1,7 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
-
 import { Button } from './button';
 
 export function EmptyState({

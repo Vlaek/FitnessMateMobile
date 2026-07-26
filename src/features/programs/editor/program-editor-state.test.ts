@@ -5,10 +5,10 @@ import {
   moveExercise,
   removeSet,
   updateSet,
-  type ProgramEditorDraft,
+  type TProgramEditorDraft,
 } from './program-editor-state';
 
-const empty: ProgramEditorDraft = { name: '', description: '', exercises: [] };
+const empty: TProgramEditorDraft = { name: '', description: '', exercises: [] };
 
 describe('program editor state', () => {
   it('adds an exercise with one default set', () => {
@@ -35,7 +35,7 @@ describe('program editor state', () => {
   });
 
   it('moves an exercise to an arbitrary drag destination', () => {
-    const draft: ProgramEditorDraft = {
+    const draft: TProgramEditorDraft = {
       ...empty,
       exercises: ['a', 'b', 'c'].map((exerciseId) => ({
         exerciseId,

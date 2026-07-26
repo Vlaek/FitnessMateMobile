@@ -1,5 +1,4 @@
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 
 export function TextField({

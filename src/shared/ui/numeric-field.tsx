@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-
 import { TextField } from './text-field';
 
-type Props = {
+type TProps = {
   label: string;
   value: number;
   onValueChange: (value: number) => void;
   integer?: boolean;
 };
 
-export function NumericField({ label, value, onValueChange, integer = false }: Props) {
+export function NumericField({ label, value, onValueChange, integer = false }: TProps) {
   const [text, setText] = useState(formatNumber(value));
   const isEditing = useRef(false);
 

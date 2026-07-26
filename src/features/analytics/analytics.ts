@@ -1,26 +1,28 @@
-export type CompletedSetRow = {
+export type TCompletedSetRow = {
   workoutId: string;
   completedAt: string;
   exerciseName: string;
   weightKg: number;
   repetitions: number;
 };
-export type ExerciseRecord = {
+
+export type TExerciseRecord = {
   exerciseName: string;
   maxWeightKg: number;
   maxSetVolumeKg: number;
   trend: { date: string; maxWeightKg: number; volumeKg: number }[];
 };
-export type Analytics = {
+
+export type TAnalytics = {
   totalWorkouts: number;
   weeklyVolumeKg: number;
-  records: ExerciseRecord[];
+  records: TExerciseRecord[];
 };
 
-export function calculateAnalytics(rows: CompletedSetRow[], now = new Date()): Analytics {
+export function calculateAnalytics(rows: TCompletedSetRow[], now = new Date()): TAnalytics {
   const weekStart = now.getTime() - 7 * 24 * 60 * 60 * 1000;
   const workouts = new Set(rows.map((row) => row.workoutId));
-  const grouped = new Map<string, CompletedSetRow[]>();
+  const grouped = new Map<string, TCompletedSetRow[]>();
 
   for (const row of rows) {
     grouped.set(row.exerciseName, [...(grouped.get(row.exerciseName) ?? []), row]);
@@ -33,7 +35,7 @@ export function calculateAnalytics(rows: CompletedSetRow[], now = new Date()): A
       .reduce((sum, row) => sum + row.weightKg * row.repetitions, 0),
     records: [...grouped.entries()]
       .map(([exerciseName, sets]) => {
-        const days = new Map<string, CompletedSetRow[]>();
+        const days = new Map<string, TCompletedSetRow[]>();
 
         for (const set of sets) {
           const date = set.completedAt.slice(0, 10);

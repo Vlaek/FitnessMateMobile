@@ -1,5 +1,4 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 
 export function AppHeader({

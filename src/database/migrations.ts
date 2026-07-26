@@ -1,4 +1,4 @@
-import type { DatabaseAdapter } from './types';
+import type { IDatabaseAdapter } from './types';
 
 export const CURRENT_DATABASE_VERSION = 1;
 
@@ -88,7 +88,7 @@ CREATE INDEX IF NOT EXISTS idx_workout_sets_exercise
 ON workout_sets(workout_exercise_id, sort_order);
 `;
 
-export async function migrateDatabase(db: DatabaseAdapter): Promise<void> {
+export async function migrateDatabase(db: IDatabaseAdapter): Promise<void> {
   await db.execAsync('PRAGMA foreign_keys = ON;');
   const versionRow = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version;');
   const version = versionRow?.user_version ?? 0;

@@ -1,5 +1,4 @@
 import { FakeDatabase } from '@/test/fake-database';
-
 import { SqliteExerciseRepository } from './exercise-repository';
 
 describe('SqliteExerciseRepository', () => {
@@ -62,7 +61,7 @@ describe('SqliteExerciseRepository', () => {
   it('rejects an empty custom name', async () => {
     const repository = new SqliteExerciseRepository(new FakeDatabase());
     await expect(repository.createCustom({ name: ' ', muscleGroup: 'chest' })).rejects.toThrow(
-      'Exercise name is required',
+      'TExercise name is required',
     );
   });
 });

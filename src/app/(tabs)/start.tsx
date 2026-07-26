@@ -2,8 +2,7 @@ import { useFocusEffect, router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
-import type { ProgramSummary } from '@/domain/programs/types';
+import type { TProgramSummary } from '@/domain/programs/types';
 import { programRepository } from '@/database/repositories/program-repository';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
@@ -14,7 +13,7 @@ import { Screen } from '@/shared/ui/screen';
 export default function StartScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
-  const [programs, setPrograms] = useState<ProgramSummary[]>([]);
+  const [programs, setPrograms] = useState<TProgramSummary[]>([]);
   const [hasActive, setHasActive] = useState(false);
   const [busy, setBusy] = useState(false);
   useFocusEffect(

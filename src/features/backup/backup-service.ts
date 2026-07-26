@@ -1,20 +1,18 @@
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-
 import { database } from '@/database/client';
-import type { DatabaseAdapter, SqlParams } from '@/database/types';
+import type { IDatabaseAdapter, TSqlParams } from '@/database/types';
+import { parseBackup, type TFitnessMateBackup } from './backup-schema';
 
-import { parseBackup, type FitnessMateBackup } from './backup-schema';
-
-type Sections = { programs: boolean; history: boolean };
+type TSections = { programs: boolean; history: boolean };
 export async function buildBackup(
-  sections: Sections,
-  db: DatabaseAdapter = database,
-): Promise<FitnessMateBackup> {
+  sections: TSections,
+  db: IDatabaseAdapter = database,
+): Promise<TFitnessMateBackup> {
   const exercises =
-    await db.getAllAsync<FitnessMateBackup['exercises'][number]>('SELECT * FROM exercises');
+    await db.getAllAsync<TFitnessMateBackup['exercises'][number]>('SELECT * FROM exercises');
   const workouts = sections.history
-    ? await db.getAllAsync<FitnessMateBackup['workouts'][number]>(
+    ? await db.getAllAsync<TFitnessMateBackup['workouts'][number]>(
         "SELECT * FROM workouts WHERE status = 'completed'",
       )
     : [];
@@ -46,7 +44,7 @@ export async function buildBackup(
   };
 }
 
-export async function exportBackup(sections: Sections): Promise<void> {
+export async function exportBackup(sections: TSections): Promise<void> {
   const backup = await buildBackup(sections);
   const file = new File(
     Paths.cache,
@@ -63,14 +61,14 @@ export async function exportBackup(sections: Sections): Promise<void> {
   }
 }
 
-export async function readBackupFile(uri: string): Promise<FitnessMateBackup> {
+export async function readBackupFile(uri: string): Promise<TFitnessMateBackup> {
   return parseBackup(JSON.parse(await new File(uri).text()));
 }
 
 export async function restoreBackup(
   raw: unknown,
   mode: 'merge' | 'replace',
-  db: DatabaseAdapter = database,
+  db: IDatabaseAdapter = database,
 ): Promise<void> {
   const backup = parseBackup(raw);
   await db.withTransactionAsync(async () => {
@@ -118,16 +116,16 @@ export async function restoreBackup(
   });
 }
 
-async function insert(db: DatabaseAdapter, table: string, row: Record<string, unknown>) {
+async function insert(db: IDatabaseAdapter, table: string, row: Record<string, unknown>) {
   const columns = Object.keys(row);
-  const values = columns.map((key) => row[key]) as SqlParams;
+  const values = columns.map((key) => row[key]) as TSqlParams;
   await db.runAsync(
     `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
     values,
   );
 }
 
-export async function clearAllData(db: DatabaseAdapter = database) {
+export async function clearAllData(db: IDatabaseAdapter = database) {
   await db.withTransactionAsync(async () => {
     await db.runAsync('DELETE FROM workouts');
     await db.runAsync('DELETE FROM programs');

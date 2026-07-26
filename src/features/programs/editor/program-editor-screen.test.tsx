@@ -1,7 +1,5 @@
 import { render } from '@testing-library/react-native';
-
 import { setAppLanguage } from '@/shared/i18n';
-
 import { ProgramEditorScreen } from './program-editor-screen';
 import { useProgramEditor } from './use-program-editor';
 

@@ -1,5 +1,4 @@
 import { FakeDatabase } from '@/test/fake-database';
-
 import { CURRENT_DATABASE_VERSION, migrateDatabase } from './migrations';
 
 describe('migrateDatabase', () => {

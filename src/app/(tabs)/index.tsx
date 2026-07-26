@@ -2,7 +2,6 @@ import { useFocusEffect, router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import { fromCanonicalKg } from '@/domain/units/weight';
 import { usePreferencesStore } from '@/features/settings/preferences-store';

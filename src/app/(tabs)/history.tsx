@@ -2,8 +2,7 @@ import { useFocusEffect, router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
-import type { WorkoutSummary } from '@/domain/workouts/types';
+import type { TWorkoutSummary } from '@/domain/workouts/types';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import { fromCanonicalKg } from '@/domain/units/weight';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
@@ -16,7 +15,7 @@ export default function HistoryScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const unit = usePreferencesStore((s) => s.weightUnit);
-  const [items, setItems] = useState<WorkoutSummary[]>([]);
+  const [items, setItems] = useState<TWorkoutSummary[]>([]);
   const [loading, setLoading] = useState(true);
   useFocusEffect(
     useCallback(() => {

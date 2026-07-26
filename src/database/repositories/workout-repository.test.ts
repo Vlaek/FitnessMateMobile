@@ -1,5 +1,4 @@
 import { FakeDatabase } from '@/test/fake-database';
-
 import { SqliteWorkoutRepository } from './workout-repository';
 
 describe('SqliteWorkoutRepository', () => {

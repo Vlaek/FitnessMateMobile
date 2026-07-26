@@ -1,25 +1,25 @@
-import type { ProgramInput, ProgramSetInput } from '@/domain/programs/types';
+import type { TProgramInput, TProgramSetInput } from '@/domain/programs/types';
 
-export type ProgramEditorDraft = ProgramInput;
+export type TProgramEditorDraft = TProgramInput;
 
-export const EMPTY_PROGRAM: ProgramEditorDraft = { name: '', description: '', exercises: [] };
+export const EMPTY_PROGRAM: TProgramEditorDraft = { name: '', description: '', exercises: [] };
 
-export function addExercise(draft: ProgramEditorDraft, exerciseId: string): ProgramEditorDraft {
+export function addExercise(draft: TProgramEditorDraft, exerciseId: string): TProgramEditorDraft {
   return {
     ...draft,
     exercises: [...draft.exercises, { exerciseId, sets: [{ weightKg: 0, repetitions: 10 }] }],
   };
 }
 
-export function removeExercise(draft: ProgramEditorDraft, index: number): ProgramEditorDraft {
+export function removeExercise(draft: TProgramEditorDraft, index: number): TProgramEditorDraft {
   return { ...draft, exercises: draft.exercises.filter((_, itemIndex) => itemIndex !== index) };
 }
 
 export function moveExercise(
-  draft: ProgramEditorDraft,
+  draft: TProgramEditorDraft,
   from: number,
   to: number,
-): ProgramEditorDraft {
+): TProgramEditorDraft {
   if (to < 0 || to >= draft.exercises.length || from === to) {
     return draft;
   }
@@ -37,17 +37,17 @@ export function moveExercise(
 }
 
 export function updateSet(
-  draft: ProgramEditorDraft,
+  draft: TProgramEditorDraft,
   exerciseIndex: number,
   setIndex: number,
-  value: ProgramSetInput,
-): ProgramEditorDraft {
+  value: TProgramSetInput,
+): TProgramEditorDraft {
   return changeSets(draft, exerciseIndex, (sets) =>
     sets.map((set, index) => (index === setIndex ? value : set)),
   );
 }
 
-export function addSet(draft: ProgramEditorDraft, exerciseIndex: number): ProgramEditorDraft {
+export function addSet(draft: TProgramEditorDraft, exerciseIndex: number): TProgramEditorDraft {
   return changeSets(draft, exerciseIndex, (sets) => [
     ...sets,
     { ...(sets.at(-1) ?? { weightKg: 0, repetitions: 10 }) },
@@ -55,10 +55,10 @@ export function addSet(draft: ProgramEditorDraft, exerciseIndex: number): Progra
 }
 
 export function duplicateSet(
-  draft: ProgramEditorDraft,
+  draft: TProgramEditorDraft,
   exerciseIndex: number,
   setIndex: number,
-): ProgramEditorDraft {
+): TProgramEditorDraft {
   return changeSets(draft, exerciseIndex, (sets) => {
     const source = sets[setIndex];
 
@@ -74,10 +74,10 @@ export function duplicateSet(
 }
 
 export function removeSet(
-  draft: ProgramEditorDraft,
+  draft: TProgramEditorDraft,
   exerciseIndex: number,
   setIndex: number,
-): ProgramEditorDraft {
+): TProgramEditorDraft {
   const exercise = draft.exercises[exerciseIndex];
 
   if (!exercise || exercise.sets.length <= 1) {
@@ -88,10 +88,10 @@ export function removeSet(
 }
 
 function changeSets(
-  draft: ProgramEditorDraft,
+  draft: TProgramEditorDraft,
   exerciseIndex: number,
-  transform: (sets: ProgramSetInput[]) => ProgramSetInput[],
-): ProgramEditorDraft {
+  transform: (sets: TProgramSetInput[]) => TProgramSetInput[],
+): TProgramEditorDraft {
   return {
     ...draft,
     exercises: draft.exercises.map((exercise, index) =>

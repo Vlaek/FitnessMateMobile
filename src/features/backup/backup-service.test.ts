@@ -1,5 +1,4 @@
 import { FakeDatabase } from '@/test/fake-database';
-
 import { buildBackup, restoreBackup } from './backup-service';
 
 describe('backup service', () => {
@@ -10,7 +9,7 @@ describe('backup service', () => {
       {
         id: 'w',
         source_program_id: 'program',
-        name: 'Workout',
+        name: 'TWorkout',
         status: 'completed' as const,
         started_at: 'start',
         completed_at: 'done',

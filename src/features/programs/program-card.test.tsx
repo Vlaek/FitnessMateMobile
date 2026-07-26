@@ -1,11 +1,9 @@
 import { render } from '@testing-library/react-native';
-
-import type { ProgramSummary } from '@/domain/programs/types';
+import type { TProgramSummary } from '@/domain/programs/types';
 import { setAppLanguage } from '@/shared/i18n';
-
 import { ProgramCard } from './program-card';
 
-const program: ProgramSummary = {
+const program: TProgramSummary = {
   id: 'program',
   name: 'Strength',
   description: 'Main lifts',

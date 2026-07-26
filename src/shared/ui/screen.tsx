@@ -1,10 +1,9 @@
 import type { PropsWithChildren } from 'react';
 import { KeyboardAvoidingView, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 
-type Props = PropsWithChildren<{
+type TProps = PropsWithChildren<{
   scroll?: boolean;
   bottomInset?: 'safeArea' | 'tabBar';
   keyboardAware?: boolean;
@@ -17,7 +16,7 @@ export function Screen({
   bottomInset = 'safeArea',
   keyboardAware = false,
   contentStyle,
-}: Props) {
+}: TProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useAppTheme();
   const isIOS = process.env.EXPO_OS === 'ios';

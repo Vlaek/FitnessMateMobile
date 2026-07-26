@@ -1,7 +1,5 @@
 import { render } from '@testing-library/react-native';
-
 import { setAppLanguage } from '@/shared/i18n';
-
 import { SettingsScreen } from './settings-screen';
 
 jest.mock('expo-router', () => ({

@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
-
-import type { Exercise, MuscleGroup } from '@/domain/exercises/types';
+import type { TExercise, TMuscleGroup } from '@/domain/exercises/types';
 import { parseProgramInput } from '@/domain/programs/program-schema';
 import { exerciseRepository } from '@/database/repositories/exercise-repository';
 import { programRepository } from '@/database/repositories/program-repository';
-
-import { EMPTY_PROGRAM, type ProgramEditorDraft } from './program-editor-state';
+import { EMPTY_PROGRAM, type TProgramEditorDraft } from './program-editor-state';
 
 export function useProgramEditor(programId?: string) {
-  const [draft, setDraft] = useState<ProgramEditorDraft>(EMPTY_PROGRAM);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [draft, setDraft] = useState<TProgramEditorDraft>(EMPTY_PROGRAM);
+  const [exercises, setExercises] = useState<TExercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +74,7 @@ export function useProgramEditor(programId?: string) {
     }
   };
 
-  const createExercise = async (name: string, muscleGroup: MuscleGroup) => {
+  const createExercise = async (name: string, muscleGroup: TMuscleGroup) => {
     const exercise = await exerciseRepository.createCustom({ name, muscleGroup });
     setExercises((current) => [...current, exercise]);
 

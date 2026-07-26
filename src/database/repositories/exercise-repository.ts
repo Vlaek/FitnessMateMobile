@@ -1,42 +1,40 @@
 import { randomUUID } from 'expo-crypto';
-
-import type { Exercise, MuscleGroup } from '@/domain/exercises/types';
-
+import type { TExercise, TMuscleGroup } from '@/domain/exercises/types';
 import { database } from '../client';
-import type { DatabaseAdapter } from '../types';
+import type { IDatabaseAdapter } from '../types';
 
-type ExerciseRow = {
+type TExerciseRow = {
   id: string;
   built_in_key: string | null;
   custom_name: string | null;
-  muscle_group: MuscleGroup;
+  muscle_group: TMuscleGroup;
   is_custom: 0 | 1;
 };
 
-type RepositoryDependencies = {
+type TRepositoryDependencies = {
   createId: () => string;
   now: () => string;
 };
 
-const defaultDependencies: RepositoryDependencies = {
+const defaultDependencies: TRepositoryDependencies = {
   createId: randomUUID,
   now: () => new Date().toISOString(),
 };
 
-export interface ExerciseRepository {
-  listAll(): Promise<Exercise[]>;
-  createCustom(input: { name: string; muscleGroup: MuscleGroup }): Promise<Exercise>;
+export interface IExerciseRepository {
+  listAll(): Promise<TExercise[]>;
+  createCustom(input: { name: string; muscleGroup: TMuscleGroup }): Promise<TExercise>;
   deleteCustom(id: string): Promise<void>;
 }
 
-export class SqliteExerciseRepository implements ExerciseRepository {
+export class SqliteExerciseRepository implements IExerciseRepository {
   constructor(
-    private readonly db: DatabaseAdapter = database,
-    private readonly dependencies: RepositoryDependencies = defaultDependencies,
+    private readonly db: IDatabaseAdapter = database,
+    private readonly dependencies: TRepositoryDependencies = defaultDependencies,
   ) {}
 
-  async listAll(): Promise<Exercise[]> {
-    const rows = await this.db.getAllAsync<ExerciseRow>(
+  async listAll(): Promise<TExercise[]> {
+    const rows = await this.db.getAllAsync<TExerciseRow>(
       `SELECT id, built_in_key, custom_name, muscle_group, is_custom
        FROM exercises
        ORDER BY is_custom ASC, COALESCE(built_in_key, LOWER(custom_name)) ASC`,
@@ -45,14 +43,14 @@ export class SqliteExerciseRepository implements ExerciseRepository {
     return rows.map(mapExerciseRow);
   }
 
-  async createCustom(input: { name: string; muscleGroup: MuscleGroup }): Promise<Exercise> {
+  async createCustom(input: { name: string; muscleGroup: TMuscleGroup }): Promise<TExercise> {
     const name = input.name.trim();
 
     if (!name) {
-      throw new Error('Exercise name is required');
+      throw new Error('TExercise name is required');
     }
 
-    const exercise: Exercise = {
+    const exercise: TExercise = {
       id: this.dependencies.createId(),
       builtInKey: null,
       customName: name,
@@ -74,7 +72,7 @@ export class SqliteExerciseRepository implements ExerciseRepository {
   }
 }
 
-function mapExerciseRow(row: ExerciseRow): Exercise {
+function mapExerciseRow(row: TExerciseRow): TExercise {
   return {
     id: row.id,
     builtInKey: row.built_in_key,

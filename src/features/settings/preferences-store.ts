@@ -3,28 +3,28 @@ import Storage from 'expo-sqlite/kv-store';
 import { useStore } from 'zustand';
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
+import type { TWeightUnit } from '@/domain/units/weight';
 
-import type { WeightUnit } from '@/domain/units/weight';
+export type TAppLanguage = 'ru' | 'en';
 
-export type AppLanguage = 'ru' | 'en';
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type TThemeMode = 'system' | 'light' | 'dark';
 
-export type DeviceLocale = {
+export type TDeviceLocale = {
   languageCode: string | null;
   measurementSystem: 'metric' | 'us' | 'uk' | null;
 };
 
-export type PreferencesState = {
-  language: AppLanguage;
-  weightUnit: WeightUnit;
-  themeMode: ThemeMode;
-  setLanguage: (language: AppLanguage) => void;
-  setWeightUnit: (weightUnit: WeightUnit) => void;
-  setThemeMode: (themeMode: ThemeMode) => void;
+export type TPreferencesState = {
+  language: TAppLanguage;
+  weightUnit: TWeightUnit;
+  themeMode: TThemeMode;
+  setLanguage: (language: TAppLanguage) => void;
+  setWeightUnit: (weightUnit: TWeightUnit) => void;
+  setThemeMode: (themeMode: TThemeMode) => void;
   reset: () => void;
 };
 
-function defaults(locale: DeviceLocale) {
+function defaults(locale: TDeviceLocale) {
   return {
     language: locale.languageCode === 'en' ? ('en' as const) : ('ru' as const),
     weightUnit: locale.measurementSystem === 'us' ? ('lb' as const) : ('kg' as const),
@@ -34,11 +34,11 @@ function defaults(locale: DeviceLocale) {
 
 export function createPreferencesStore(
   storage: StateStorage,
-  locale: DeviceLocale,
-): StoreApi<PreferencesState> {
+  locale: TDeviceLocale,
+): StoreApi<TPreferencesState> {
   const initial = defaults(locale);
 
-  return createStore<PreferencesState>()(
+  return createStore<TPreferencesState>()(
     persist(
       (set) => ({
         ...initial,
@@ -67,6 +67,6 @@ const deviceLocale = Localization.getLocales()[0] ?? {
 
 export const preferencesStore = createPreferencesStore(Storage, deviceLocale);
 
-export function usePreferencesStore<T>(selector: (state: PreferencesState) => T): T {
+export function usePreferencesStore<T>(selector: (state: TPreferencesState) => T): T {
   return useStore(preferencesStore, selector);
 }

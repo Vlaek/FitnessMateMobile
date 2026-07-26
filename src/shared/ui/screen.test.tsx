@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
 import { Screen } from './screen';
 
 const metrics = {

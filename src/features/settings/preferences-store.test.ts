@@ -1,5 +1,4 @@
 import type { StateStorage } from 'zustand/middleware';
-
 import { createPreferencesStore } from './preferences-store';
 
 const memoryStorage = (): StateStorage => {

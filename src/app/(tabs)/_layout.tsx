@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { TAB_ROUTES } from '@/features/navigation/tab-config';
 
