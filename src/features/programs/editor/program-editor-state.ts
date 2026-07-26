@@ -15,12 +15,24 @@ export function removeExercise(draft: ProgramEditorDraft, index: number): Progra
   return { ...draft, exercises: draft.exercises.filter((_, itemIndex) => itemIndex !== index) };
 }
 
-export function moveExercise(draft: ProgramEditorDraft, from: number, to: number): ProgramEditorDraft {
-  if (to < 0 || to >= draft.exercises.length || from === to) return draft;
+export function moveExercise(
+  draft: ProgramEditorDraft,
+  from: number,
+  to: number,
+): ProgramEditorDraft {
+  if (to < 0 || to >= draft.exercises.length || from === to) {
+    return draft;
+  }
+
   const exercises = [...draft.exercises];
   const [moved] = exercises.splice(from, 1);
-  if (!moved) return draft;
+
+  if (!moved) {
+    return draft;
+  }
+
   exercises.splice(to, 0, moved);
+
   return { ...draft, exercises };
 }
 
@@ -49,9 +61,14 @@ export function duplicateSet(
 ): ProgramEditorDraft {
   return changeSets(draft, exerciseIndex, (sets) => {
     const source = sets[setIndex];
-    if (!source) return sets;
+
+    if (!source) {
+      return sets;
+    }
+
     const next = [...sets];
     next.splice(setIndex + 1, 0, { ...source });
+
     return next;
   });
 }
@@ -62,7 +79,11 @@ export function removeSet(
   setIndex: number,
 ): ProgramEditorDraft {
   const exercise = draft.exercises[exerciseIndex];
-  if (!exercise || exercise.sets.length <= 1) return draft;
+
+  if (!exercise || exercise.sets.length <= 1) {
+    return draft;
+  }
+
   return changeSets(draft, exerciseIndex, (sets) => sets.filter((_, index) => index !== setIndex));
 }
 

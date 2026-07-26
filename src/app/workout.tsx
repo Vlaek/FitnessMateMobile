@@ -1,2 +1,4 @@
 import { ActiveWorkoutScreen } from '@/features/workouts/active-workout-screen';
-export default function WorkoutRoute() { return <ActiveWorkoutScreen />; }
+export default function WorkoutRoute() {
+  return <ActiveWorkoutScreen />;
+}

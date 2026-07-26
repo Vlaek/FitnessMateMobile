@@ -2,11 +2,7 @@ import * as Localization from 'expo-localization';
 import Storage from 'expo-sqlite/kv-store';
 import { useStore } from 'zustand';
 import { createStore, type StoreApi } from 'zustand/vanilla';
-import {
-  createJSONStorage,
-  persist,
-  type StateStorage,
-} from 'zustand/middleware';
+import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
 import type { WeightUnit } from '@/domain/units/weight';
 
@@ -41,6 +37,7 @@ export function createPreferencesStore(
   locale: DeviceLocale,
 ): StoreApi<PreferencesState> {
   const initial = defaults(locale);
+
   return createStore<PreferencesState>()(
     persist(
       (set) => ({

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -22,15 +22,64 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
   const [draft, setDraft] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  useEffect(() => {
-    void workoutRepository
-      .getById(workoutId)
-      .then(setWorkout)
-      .finally(() => setLoading(false));
+  const loadWorkout = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+
+    try {
+      setWorkout(await workoutRepository.getById(workoutId));
+    } catch (error) {
+      setWorkout(null);
+      setLoadError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoading(false);
+    }
   }, [workoutId]);
 
-  if (loading) return <LoadingScreen />;
+  useEffect(() => {
+    let cancelled = false;
+
+    void workoutRepository
+      .getById(workoutId)
+      .then((result) => {
+        if (!cancelled) {
+          setWorkout(result);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setWorkout(null);
+          setLoadError(error instanceof Error ? error.message : String(error));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [workoutId]);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (loadError) {
+    return (
+      <ErrorScreen
+        message={loadError}
+        actionLabel={t('common.retry')}
+        onRetry={() => void loadWorkout()}
+      />
+    );
+  }
+
   if (!workout) {
     return (
       <ErrorScreen
@@ -48,22 +97,32 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
     index: number,
     transform: (value: Workout['exercises'][number]) => Workout['exercises'][number],
   ) => {
-    if (!draft) return;
+    if (!draft) {
+      return;
+    }
+
     setDraft({
       ...draft,
       exercises: draft.exercises.map((item, itemIndex) =>
-        itemIndex === index ? transform(item) : item
+        itemIndex === index ? transform(item) : item,
       ),
     });
   };
 
   const save = async () => {
-    if (!draft) return;
+    if (!draft) {
+      return;
+    }
+
     setSaving(true);
+    setSaveError(null);
+
     try {
       await workoutRepository.save(draft);
       setWorkout(draft);
       setDraft(null);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : String(error));
     } finally {
       setSaving(false);
     }
@@ -73,15 +132,12 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
     const body = [
       workout.name,
       new Date(workout.completedAt ?? workout.startedAt).toLocaleString(),
-      ...workout.exercises.map((exercise) =>
-        `${t(`exercises.${exercise.exerciseName}`, { defaultValue: exercise.exerciseName })}: ${
-          exercise.sets
+      ...workout.exercises.map(
+        (exercise) =>
+          `${t(`exercises.${exercise.exerciseName}`, { defaultValue: exercise.exerciseName })}: ${exercise.sets
             .filter((set) => set.isCompleted)
-            .map((set) =>
-              `${fromCanonicalKg(set.weightKg, unit)} ${unit} × ${set.repetitions}`
-            )
-            .join(', ')
-        }`
+            .map((set) => `${fromCanonicalKg(set.weightKg, unit)} ${unit} × ${set.repetitions}`)
+            .join(', ')}`,
       ),
     ].join('\n');
     void Share.share({ title: workout.name, message: body });
@@ -135,7 +191,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
                               sets: current.sets.map((item, itemIndex) =>
                                 itemIndex === setIndex
                                   ? { ...item, weightKg: toCanonicalKg(value, unit) }
-                                  : item
+                                  : item,
                               ),
                             }))
                           }
@@ -150,9 +206,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
                             setExercise(exerciseIndex, (current) => ({
                               ...current,
                               sets: current.sets.map((item, itemIndex) =>
-                                itemIndex === setIndex
-                                  ? { ...item, repetitions: value }
-                                  : item
+                                itemIndex === setIndex ? { ...item, repetitions: value } : item,
                               ),
                             }))
                           }
@@ -172,7 +226,14 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
       </View>
 
       {isEditing ? (
-        <Button label={t('common.save')} loading={saving} onPress={() => void save()} />
+        <View style={styles.saveSection}>
+          {saveError ? (
+            <Text selectable style={{ color: colors.danger }}>
+              {saveError}
+            </Text>
+          ) : null}
+          <Button label={t('common.save')} loading={saving} onPress={() => void save()} />
+        </View>
       ) : (
         <Button label={t('common.edit')} onPress={() => setDraft(cloneWorkout(workout))} />
       )}
@@ -208,5 +269,6 @@ const styles = StyleSheet.create({
   setNumber: { width: '100%', fontWeight: '700' },
   value: { fontSize: 16, fontVariant: ['tabular-nums'] },
   field: { flex: 1, minWidth: 120 },
+  saveSection: { gap: 10 },
   secondaryActions: { gap: 12 },
 });

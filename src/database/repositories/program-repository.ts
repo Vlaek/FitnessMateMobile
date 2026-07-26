@@ -1,11 +1,7 @@
 import { randomUUID } from 'expo-crypto';
 
 import { parseProgramInput } from '@/domain/programs/program-schema';
-import type {
-  Program,
-  ProgramInput,
-  ProgramSummary,
-} from '@/domain/programs/types';
+import type { Program, ProgramInput, ProgramSummary } from '@/domain/programs/types';
 
 import { database } from '../client';
 import type { DatabaseAdapter } from '../types';
@@ -77,7 +73,10 @@ export class SqliteProgramRepository implements ProgramRepository {
        FROM programs WHERE id = ?`,
       [id],
     );
-    if (!row) return null;
+
+    if (!row) {
+      return null;
+    }
 
     const exerciseRows = await this.db.getAllAsync<ProgramExerciseRow>(
       `SELECT id, exercise_id, sort_order FROM program_exercises
@@ -133,7 +132,11 @@ export class SqliteProgramRepository implements ProgramRepository {
   async update(id: string, rawInput: ProgramInput): Promise<Program> {
     const input = parseProgramInput(rawInput);
     const existing = await this.getById(id);
-    if (!existing) throw new Error('Program not found');
+
+    if (!existing) {
+      throw new Error('Program not found');
+    }
+
     const updatedAt = this.dependencies.now();
 
     await this.db.withTransactionAsync(async () => {
@@ -150,7 +153,11 @@ export class SqliteProgramRepository implements ProgramRepository {
 
   async duplicate(id: string): Promise<Program> {
     const source = await this.getById(id);
-    if (!source) throw new Error('Program not found');
+
+    if (!source) {
+      throw new Error('Program not found');
+    }
+
     return this.create({
       name: `${source.name} Copy`.slice(0, 100),
       description: source.description,
@@ -162,11 +169,14 @@ export class SqliteProgramRepository implements ProgramRepository {
     if (new Set(orderedIds).size !== orderedIds.length) {
       throw new Error('Program order contains duplicate IDs');
     }
+
     const rows = await this.db.getAllAsync<{ id: string }>('SELECT id FROM programs');
     const storedIds = new Set(rows.map((row) => row.id));
+
     if (storedIds.size !== orderedIds.length || orderedIds.some((id) => !storedIds.has(id))) {
       throw new Error('Program order must contain every program exactly once');
     }
+
     await this.db.withTransactionAsync(async () => {
       for (const [index, id] of orderedIds.entries()) {
         await this.db.runAsync('UPDATE programs SET sort_order = ? WHERE id = ?', [index, id]);
@@ -186,6 +196,7 @@ export class SqliteProgramRepository implements ProgramRepository {
          VALUES (?, ?, ?, ?)`,
         [programExerciseId, programId, exercise.exerciseId, exerciseIndex],
       );
+
       for (const [setIndex, set] of exercise.sets.entries()) {
         await this.db.runAsync(
           `INSERT INTO program_sets

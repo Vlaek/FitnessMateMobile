@@ -6,7 +6,10 @@ describe('SqliteWorkoutRepository', () => {
   it('starts an empty workout in a transaction', async () => {
     const db = new FakeDatabase();
     db.queueFirst(null);
-    const repository = new SqliteWorkoutRepository(db, { createId: () => 'workout-1', now: () => 'now' });
+    const repository = new SqliteWorkoutRepository(db, {
+      createId: () => 'workout-1',
+      now: () => 'now',
+    });
     const workout = await repository.startEmpty('My workout');
     expect(workout).toMatchObject({ id: 'workout-1', name: 'My workout', status: 'draft' });
     expect(db.committedTransactions).toBe(1);
@@ -21,7 +24,17 @@ describe('SqliteWorkoutRepository', () => {
 
   it('only counts completed sets in history summaries', async () => {
     const db = new FakeDatabase();
-    db.queueAll([{ id: 'w', name: 'A', startedAt: 's', completedAt: 'c', exerciseCount: 1, setCount: 2, volumeKg: 120 }]);
+    db.queueAll([
+      {
+        id: 'w',
+        name: 'A',
+        startedAt: 's',
+        completedAt: 'c',
+        exerciseCount: 1,
+        setCount: 2,
+        volumeKg: 120,
+      },
+    ]);
     const repository = new SqliteWorkoutRepository(db);
     await repository.listCompleted();
     expect(db.queries[0]?.sql).toContain('ws.is_completed = 1');

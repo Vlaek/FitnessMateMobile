@@ -27,13 +27,15 @@ const workout: Workout = {
   startedAt: '2026-07-25T10:00:00.000Z',
   completedAt: '2026-07-25T11:00:00.000Z',
   updatedAt: '2026-07-25T11:00:00.000Z',
-  exercises: [{
-    id: 'exercise-1',
-    sourceExerciseId: null,
-    exerciseName: 'Bench press',
-    muscleGroup: 'chest',
-    sets: [{ id: 'set-1', weightKg: 60, repetitions: 8, isCompleted: true }],
-  }],
+  exercises: [
+    {
+      id: 'exercise-1',
+      sourceExerciseId: null,
+      exerciseName: 'Bench press',
+      muscleGroup: 'chest',
+      sets: [{ id: 'set-1', weightKg: 60, repetitions: 8, isCompleted: true }],
+    },
+  ],
 };
 
 describe('WorkoutDetailScreen', () => {
@@ -62,5 +64,25 @@ describe('WorkoutDetailScreen', () => {
     const unit = preferencesStore.getState().weightUnit;
     expect(view.getByLabelText(`Weight (${unit})`)).toBeTruthy();
     expect(view.getByText('Save')).toBeTruthy();
+  });
+
+  it('shows a load error instead of an empty-history message', async () => {
+    jest.mocked(workoutRepository.getById).mockRejectedValueOnce(new Error('load failed'));
+
+    const view = await render(<WorkoutDetailScreen workoutId="workout-1" />);
+
+    expect(await view.findByText('load failed')).toBeTruthy();
+  });
+
+  it('keeps the edit draft visible when saving fails', async () => {
+    jest.mocked(workoutRepository.save).mockRejectedValueOnce(new Error('save failed'));
+    const view = await render(<WorkoutDetailScreen workoutId="workout-1" />);
+    await fireEvent.press(await view.findByText('Edit'));
+
+    await fireEvent.press(view.getByText('Save'));
+
+    expect(await view.findByText('save failed')).toBeTruthy();
+    expect(view.getByText('Save')).toBeTruthy();
+    expect(view.getByLabelText(`Weight (${preferencesStore.getState().weightUnit})`)).toBeTruthy();
   });
 });

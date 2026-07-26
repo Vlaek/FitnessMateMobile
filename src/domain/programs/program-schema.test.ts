@@ -17,8 +17,9 @@ describe('parseProgramInput', () => {
   });
 
   it('trims metadata', () => {
-    expect(parseProgramInput({ ...validProgram, name: ' Upper body ', description: ' Note ' }))
-      .toMatchObject({ name: 'Upper body', description: 'Note' });
+    expect(
+      parseProgramInput({ ...validProgram, name: ' Upper body ', description: ' Note ' }),
+    ).toMatchObject({ name: 'Upper body', description: 'Note' });
   });
 
   it('requires a name, exercise, and set', () => {
@@ -49,10 +50,12 @@ describe('parseProgramInput', () => {
   it('accepts zero repetitions normalized from an empty field', () => {
     const input = {
       ...validProgram,
-      exercises: [{
-        ...validProgram.exercises[0],
-        sets: [{ weightKg: 0, repetitions: 0 }],
-      }],
+      exercises: [
+        {
+          ...validProgram.exercises[0],
+          sets: [{ weightKg: 0, repetitions: 0 }],
+        },
+      ],
     };
 
     expect(parseProgramInput(input).exercises[0]?.sets[0]?.repetitions).toBe(0);

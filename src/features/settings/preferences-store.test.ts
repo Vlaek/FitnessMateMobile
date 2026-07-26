@@ -4,6 +4,7 @@ import { createPreferencesStore } from './preferences-store';
 
 const memoryStorage = (): StateStorage => {
   const values = new Map<string, string>();
+
   return {
     getItem: (name) => values.get(name) ?? null,
     setItem: (name, value) => void values.set(name, value),
@@ -41,7 +42,9 @@ describe('preferences store', () => {
     store.getState().setWeightUnit('lb');
     store.getState().setThemeMode('dark');
     expect(store.getState()).toMatchObject({
-      language: 'en', weightUnit: 'lb', themeMode: 'dark',
+      language: 'en',
+      weightUnit: 'lb',
+      themeMode: 'dark',
     });
   });
 });

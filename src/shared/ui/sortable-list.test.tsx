@@ -7,7 +7,10 @@ describe('SortableList', () => {
   it('renders stable sortable rows with long-press accessibility hints', async () => {
     const view = await render(
       <SortableList
-        data={[{ id: 'a', label: 'First' }, { id: 'b', label: 'Second' }]}
+        data={[
+          { id: 'a', label: 'First' },
+          { id: 'b', label: 'Second' },
+        ]}
         keyExtractor={(item) => item.id}
         onReorder={jest.fn()}
         renderItem={(item) => <Text>{item.label}</Text>}

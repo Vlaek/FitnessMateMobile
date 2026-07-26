@@ -43,7 +43,10 @@ describe('program editor state', () => {
       })),
     };
 
-    expect(moveExercise(draft, 0, 2).exercises.map((item) => item.exerciseId))
-      .toEqual(['b', 'c', 'a']);
+    expect(moveExercise(draft, 0, 2).exercises.map((item) => item.exerciseId)).toEqual([
+      'b',
+      'c',
+      'a',
+    ]);
   });
 });

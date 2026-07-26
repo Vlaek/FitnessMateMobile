@@ -52,4 +52,39 @@ describe('usePrograms', () => {
     expect(result.current.items.map((item) => item.id)).toEqual(['a', 'b', 'c']);
     expect(result.current.error).toBe('offline');
   });
+
+  it('ignores a second drag while an order is being persisted', async () => {
+    let release: (() => void) | undefined;
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const repository = createRepository(jest.fn().mockReturnValue(pending));
+    const { result } = await renderHook(() => usePrograms(repository));
+    await waitFor(() => expect(result.current.items).toHaveLength(3));
+
+    await act(async () => {
+      void result.current.reorder(0, 1);
+    });
+    await waitFor(() => expect(result.current.isReordering).toBe(true));
+    await act(async () => result.current.reorder(1, 2));
+
+    expect(repository.reorder).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      release?.();
+      await pending;
+    });
+  });
+
+  it('shows a deletion error without losing the list', async () => {
+    const repository = createRepository(jest.fn());
+    jest.mocked(repository.delete).mockRejectedValue(new Error('delete failed'));
+    const { result } = await renderHook(() => usePrograms(repository));
+    await waitFor(() => expect(result.current.items).toHaveLength(3));
+
+    await act(async () => result.current.remove('a'));
+
+    expect(result.current.items).toHaveLength(3);
+    expect(result.current.error).toBe('delete failed');
+  });
 });

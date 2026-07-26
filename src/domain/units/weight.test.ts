@@ -13,9 +13,7 @@ describe('weight conversion', () => {
   });
 
   it('rejects invalid input', () => {
-    expect(() => toCanonicalKg(-1, 'kg')).toThrow(
-      'Weight must be a finite non-negative number',
-    );
+    expect(() => toCanonicalKg(-1, 'kg')).toThrow('Weight must be a finite non-negative number');
     expect(() => toCanonicalKg(Number.NaN, 'lb')).toThrow(
       'Weight must be a finite non-negative number',
     );

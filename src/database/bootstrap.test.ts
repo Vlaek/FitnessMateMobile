@@ -10,7 +10,9 @@ describe('bootstrapDatabase', () => {
     await bootstrapDatabase(db);
     await bootstrapDatabase(db);
 
-    const inserts = db.queries.filter((query) => query.sql.includes('INSERT OR IGNORE INTO exercises'));
+    const inserts = db.queries.filter((query) =>
+      query.sql.includes('INSERT OR IGNORE INTO exercises'),
+    );
     expect(BUILT_IN_EXERCISES).toHaveLength(10);
     expect(new Set(BUILT_IN_EXERCISES.map((exercise) => exercise.id)).size).toBe(10);
     expect(inserts).toHaveLength(20);

@@ -41,12 +41,16 @@ export class SqliteExerciseRepository implements ExerciseRepository {
        FROM exercises
        ORDER BY is_custom ASC, COALESCE(built_in_key, LOWER(custom_name)) ASC`,
     );
+
     return rows.map(mapExerciseRow);
   }
 
   async createCustom(input: { name: string; muscleGroup: MuscleGroup }): Promise<Exercise> {
     const name = input.name.trim();
-    if (!name) throw new Error('Exercise name is required');
+
+    if (!name) {
+      throw new Error('Exercise name is required');
+    }
 
     const exercise: Exercise = {
       id: this.dependencies.createId(),
@@ -61,6 +65,7 @@ export class SqliteExerciseRepository implements ExerciseRepository {
        VALUES (?, NULL, ?, ?, 1, ?)`,
       [exercise.id, name, input.muscleGroup, this.dependencies.now()],
     );
+
     return exercise;
   }
 

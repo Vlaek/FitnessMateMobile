@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { GestureDetector } from 'react-native-gesture-handler';
 
 import { exerciseDisplayName } from '@/domain/exercises/display-name';
 import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
@@ -33,7 +34,10 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
   const editor = useProgramEditor(programId);
   const [picker, setPicker] = useState(false);
 
-  if (editor.loading) return <LoadingScreen />;
+  if (editor.loading) {
+    return <LoadingScreen />;
+  }
+
   if (editor.error === 'not-found') {
     return (
       <ErrorScreen
@@ -46,7 +50,10 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
 
   const save = async () => {
     const result = await editor.save();
-    if (result) router.back();
+
+    if (result) {
+      router.back();
+    }
   };
 
   const sortableExercises = editor.draft.exercises.map((exercise, index) => ({
@@ -72,9 +79,7 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
           label={t('programs.description')}
           value={editor.draft.description}
           multiline
-          onChangeText={(description) =>
-            editor.setDraft({ ...editor.draft, description })
-          }
+          onChangeText={(description) => editor.setDraft({ ...editor.draft, description })}
         />
       </View>
 
@@ -82,39 +87,30 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
         accessibilityHint={t('editor.reorderHint')}
         data={sortableExercises}
         keyExtractor={(item) => item.key}
-        onReorder={(from, to) =>
-          editor.setDraft(moveExercise(editor.draft, from, to))
-        }
-        renderItem={({ exercise }, exerciseIndex) => {
-          const info = editor.exercises.find(
-            (item) => item.id === exercise.exerciseId
-          );
+        onReorder={(from, to) => editor.setDraft(moveExercise(editor.draft, from, to))}
+        renderItem={({ exercise }, exerciseIndex, dragGesture) => {
+          const info = editor.exercises.find((item) => item.id === exercise.exerciseId);
 
           return (
             <View
-              style={[
-                styles.card,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
+              style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
               <View style={styles.exerciseHeader}>
-                <Text style={[styles.exercise, { color: colors.text }]}>
-                  {info ? exerciseDisplayName(info, t) : exercise.exerciseId}
-                </Text>
+                <GestureDetector gesture={dragGesture}>
+                  <View style={styles.exerciseDragArea}>
+                    <Text style={[styles.exercise, { color: colors.text }]}>
+                      {info ? exerciseDisplayName(info, t) : exercise.exerciseId}
+                    </Text>
+                  </View>
+                </GestureDetector>
                 <Pressable
                   accessibilityLabel={t('editor.removeExercise')}
                   accessibilityRole="button"
                   hitSlop={10}
-                  onPress={() =>
-                    editor.setDraft(
-                      removeExercise(editor.draft, exerciseIndex)
-                    )
-                  }
+                  onPress={() => editor.setDraft(removeExercise(editor.draft, exerciseIndex))}
                   style={styles.removeExercise}
                 >
-                  <Text style={[styles.removeLabel, { color: colors.textMuted }]}>
-                    ×
-                  </Text>
+                  <Text style={[styles.removeLabel, { color: colors.textMuted }]}>×</Text>
                 </Pressable>
               </View>
 
@@ -133,7 +129,7 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
                             updateSet(editor.draft, exerciseIndex, setIndex, {
                               ...set,
                               weightKg: toCanonicalKg(value, unit),
-                            })
+                            }),
                           )
                         }
                       />
@@ -148,7 +144,7 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
                             updateSet(editor.draft, exerciseIndex, setIndex, {
                               ...set,
                               repetitions: value,
-                            })
+                            }),
                           )
                         }
                       />
@@ -159,9 +155,7 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
                       variant="ghost"
                       disabled={exercise.sets.length === 1}
                       onPress={() =>
-                        editor.setDraft(
-                          removeSet(editor.draft, exerciseIndex, setIndex)
-                        )
+                        editor.setDraft(removeSet(editor.draft, exerciseIndex, setIndex))
                       }
                     />
                   </View>
@@ -171,20 +165,14 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
               <Button
                 label={t('editor.addSet')}
                 variant="secondary"
-                onPress={() =>
-                  editor.setDraft(addSet(editor.draft, exerciseIndex))
-                }
+                onPress={() => editor.setDraft(addSet(editor.draft, exerciseIndex))}
               />
             </View>
           );
         }}
       />
 
-      <Button
-        label={t('editor.addExercise')}
-        variant="secondary"
-        onPress={() => setPicker(true)}
-      />
+      <Button label={t('editor.addExercise')} variant="secondary" onPress={() => setPicker(true)} />
       {editor.error ? (
         <Text selectable style={{ color: colors.danger }}>
           {editor.error}
@@ -194,16 +182,10 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
         <Button
           label={t('common.save')}
           loading={editor.saving}
-          disabled={
-            !editor.draft.name.trim() || editor.draft.exercises.length === 0
-          }
+          disabled={!editor.draft.name.trim() || editor.draft.exercises.length === 0}
           onPress={() => void save()}
         />
-        <Button
-          label={t('common.goBack')}
-          variant="ghost"
-          onPress={() => router.back()}
-        />
+        <Button label={t('common.goBack')} variant="ghost" onPress={() => router.back()} />
       </View>
 
       <ExercisePicker
@@ -227,8 +209,17 @@ const styles = StyleSheet.create({
   metadata: { gap: 16 },
   card: { borderWidth: 1, borderRadius: 18, padding: 14, gap: 16 },
   exerciseHeader: { minHeight: 40, justifyContent: 'center', paddingRight: 46 },
+  exerciseDragArea: { minHeight: 40, justifyContent: 'center' },
   exercise: { fontSize: 18, fontWeight: '800' },
-  removeExercise: { position: 'absolute', right: -4, top: -6, width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  removeExercise: {
+    position: 'absolute',
+    right: -4,
+    top: -6,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   removeLabel: { fontSize: 28, lineHeight: 30 },
   setList: { gap: 14 },
   setRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end', gap: 8 },

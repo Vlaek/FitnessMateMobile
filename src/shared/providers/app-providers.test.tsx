@@ -15,10 +15,17 @@ describe('AppProviders', () => {
   it('shows loading and then renders children', async () => {
     let resolveBootstrap: () => void = () => undefined;
     mockedBootstrap.mockImplementationOnce(
-      () => new Promise<void>((resolve) => { resolveBootstrap = resolve; }),
+      () =>
+        new Promise<void>((resolve) => {
+          resolveBootstrap = resolve;
+        }),
     );
 
-    await render(<AppProviders><Text>Ready</Text></AppProviders>);
+    await render(
+      <AppProviders>
+        <Text>Ready</Text>
+      </AppProviders>,
+    );
     expect(screen.getByTestId('database-loading')).toBeTruthy();
 
     resolveBootstrap();
@@ -26,11 +33,13 @@ describe('AppProviders', () => {
   });
 
   it('offers retry after bootstrap failure', async () => {
-    mockedBootstrap
-      .mockRejectedValueOnce(new Error('broken'))
-      .mockResolvedValueOnce(undefined);
+    mockedBootstrap.mockRejectedValueOnce(new Error('broken')).mockResolvedValueOnce(undefined);
 
-    await render(<AppProviders><Text>Recovered</Text></AppProviders>);
+    await render(
+      <AppProviders>
+        <Text>Recovered</Text>
+      </AppProviders>,
+    );
     expect(await screen.findByTestId('database-error')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'Retry' }));
 

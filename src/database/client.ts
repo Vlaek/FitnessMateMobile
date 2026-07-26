@@ -8,6 +8,7 @@ function getNativeDb(): SQLite.SQLiteDatabase {
   nativeDb ??= SQLite.openDatabaseSync('fitnessmate.db', {
     enableChangeListener: true,
   });
+
   return nativeDb;
 }
 
@@ -15,6 +16,7 @@ export const database: DatabaseAdapter = {
   execAsync: (sql) => getNativeDb().execAsync(sql),
   runAsync: async (sql, params: SqlParams = []) => {
     const result = await getNativeDb().runAsync(sql, ...params);
+
     return { changes: result.changes, lastInsertRowId: result.lastInsertRowId };
   },
   getFirstAsync: (sql, params: SqlParams = []) => getNativeDb().getFirstAsync(sql, ...params),

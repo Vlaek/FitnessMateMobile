@@ -4,5 +4,6 @@ import { ProgramEditorScreen } from '@/features/programs/editor/program-editor-s
 
 export default function EditProgramRoute() {
   const { programId } = useLocalSearchParams<{ programId: string }>();
+
   return <ProgramEditorScreen programId={programId} />;
 }

@@ -13,7 +13,9 @@ describe('Screen', () => {
   it('applies top and bottom safe area insets', async () => {
     const result = await render(
       <SafeAreaProvider initialMetrics={metrics}>
-        <Screen><Text>Content</Text></Screen>
+        <Screen>
+          <Text>Content</Text>
+        </Screen>
       </SafeAreaProvider>,
     );
     expect(result.getByTestId('screen-root')).toHaveStyle({ paddingTop: 44, paddingBottom: 34 });
@@ -22,7 +24,9 @@ describe('Screen', () => {
   it('avoids double bottom inset under a tab bar', async () => {
     const result = await render(
       <SafeAreaProvider initialMetrics={metrics}>
-        <Screen bottomInset="tabBar"><Text>Content</Text></Screen>
+        <Screen bottomInset="tabBar">
+          <Text>Content</Text>
+        </Screen>
       </SafeAreaProvider>,
     );
     expect(result.getByTestId('screen-root')).toHaveStyle({ paddingTop: 44, paddingBottom: 0 });
@@ -31,7 +35,9 @@ describe('Screen', () => {
   it('keeps keyboard-aware forms scrollable above the keyboard', async () => {
     const result = await render(
       <SafeAreaProvider initialMetrics={metrics}>
-        <Screen scroll keyboardAware><Text>Form</Text></Screen>
+        <Screen scroll keyboardAware>
+          <Text>Form</Text>
+        </Screen>
       </SafeAreaProvider>,
     );
 

@@ -31,8 +31,20 @@ describe('ProgramEditorScreen', () => {
       },
       setDraft: jest.fn(),
       exercises: [
-        { id: exerciseA, builtInKey: null, customName: 'Squat', muscleGroup: 'legs', isCustom: true },
-        { id: exerciseB, builtInKey: null, customName: 'Press', muscleGroup: 'chest', isCustom: true },
+        {
+          id: exerciseA,
+          builtInKey: null,
+          customName: 'Squat',
+          muscleGroup: 'legs',
+          isCustom: true,
+        },
+        {
+          id: exerciseB,
+          builtInKey: null,
+          customName: 'Press',
+          muscleGroup: 'chest',
+          isCustom: true,
+        },
       ],
       loading: false,
       saving: false,

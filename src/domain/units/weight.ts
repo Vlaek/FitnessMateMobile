@@ -10,11 +10,13 @@ function assertWeight(value: number): void {
 
 export function toCanonicalKg(value: number, unit: WeightUnit): number {
   assertWeight(value);
+
   return unit === 'kg' ? value : value / POUNDS_PER_KILOGRAM;
 }
 
 export function fromCanonicalKg(valueKg: number, unit: WeightUnit): number {
   assertWeight(valueKg);
   const displayed = unit === 'kg' ? valueKg : valueKg * POUNDS_PER_KILOGRAM;
+
   return Math.round(displayed * 100) / 100;
 }

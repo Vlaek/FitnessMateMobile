@@ -14,13 +14,26 @@ export function AppProviders({ children }: PropsWithChildren) {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<BootstrapState>('loading');
 
-  useEffect(() => { void setAppLanguage(language); }, [language]);
+  useEffect(() => {
+    void setAppLanguage(language);
+  }, [language]);
   useEffect(() => {
     let active = true;
     void bootstrapDatabase()
-      .then(() => { if (active) setState('ready'); })
-      .catch(() => { if (active) setState('error'); });
-    return () => { active = false; };
+      .then(() => {
+        if (active) {
+          setState('ready');
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setState('error');
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, [attempt]);
 
   const retry = useCallback(() => {
@@ -30,7 +43,13 @@ export function AppProviders({ children }: PropsWithChildren) {
 
   return (
     <SafeAreaProvider>
-      {state === 'loading' ? <LoadingScreen /> : state === 'error' ? <ErrorScreen onRetry={retry} /> : children}
+      {state === 'loading' ? (
+        <LoadingScreen />
+      ) : state === 'error' ? (
+        <ErrorScreen onRetry={retry} />
+      ) : (
+        children
+      )}
     </SafeAreaProvider>
   );
 }

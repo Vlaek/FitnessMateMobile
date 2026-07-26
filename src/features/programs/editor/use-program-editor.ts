@@ -17,28 +17,59 @@ export function useProgramEditor(programId?: string) {
   useEffect(() => {
     let active = true;
     void Promise.all([
-        exerciseRepository.listAll(),
-        programId ? programRepository.getById(programId) : Promise.resolve(null),
-      ]).then(([allExercises, program]) => {
-      if (!active) return;
-      setExercises(allExercises);
-      if (program) setDraft({ name: program.name, description: program.description, exercises: program.exercises });
-      if (programId && !program) setError('not-found');
-    }).catch((cause) => {
-      if (!active) return;
-      setError(cause instanceof Error ? cause.message : String(cause));
-    }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+      exerciseRepository.listAll(),
+      programId ? programRepository.getById(programId) : Promise.resolve(null),
+    ])
+      .then(([allExercises, program]) => {
+        if (!active) {
+          return;
+        }
+
+        setExercises(allExercises);
+
+        if (program) {
+          setDraft({
+            name: program.name,
+            description: program.description,
+            exercises: program.exercises,
+          });
+        }
+
+        if (programId && !program) {
+          setError('not-found');
+        }
+      })
+      .catch((cause) => {
+        if (!active) {
+          return;
+        }
+
+        setError(cause instanceof Error ? cause.message : String(cause));
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, [programId]);
 
   const save = async () => {
     setSaving(true);
     setError(null);
+
     try {
       const input = parseProgramInput(draft);
-      return programId ? await programRepository.update(programId, input) : await programRepository.create(input);
+
+      return programId
+        ? await programRepository.update(programId, input)
+        : await programRepository.create(input);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
+
       return null;
     } finally {
       setSaving(false);
@@ -48,6 +79,7 @@ export function useProgramEditor(programId?: string) {
   const createExercise = async (name: string, muscleGroup: MuscleGroup) => {
     const exercise = await exerciseRepository.createCustom({ name, muscleGroup });
     setExercises((current) => [...current, exercise]);
+
     return exercise;
   };
 

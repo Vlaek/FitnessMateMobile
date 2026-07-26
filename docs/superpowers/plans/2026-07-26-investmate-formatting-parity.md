@@ -59,8 +59,8 @@ Expected: зависимости добавлены в `devDependencies`, lock-�
 
 ```json
 "lint:fix": "expo lint --fix",
-"format": "prettier --write \"src/**/*.{ts,tsx}\" \"app/**/*.{ts,tsx}\" \"eslint.config.js\" \"package.json\" \".prettierrc.json\" \".vscode/*.json\"",
-"format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"app/**/*.{ts,tsx}\" \"eslint.config.js\" \"package.json\" \".prettierrc.json\" \".vscode/*.json\"",
+"format": "prettier --write \"src/**/*.{ts,tsx}\" \"eslint.config.js\" \"package.json\" \".prettierrc.json\" \".vscode/*.json\"",
+"format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"eslint.config.js\" \"package.json\" \".prettierrc.json\" \".vscode/*.json\"",
 "fix": "npm run lint:fix && npm run format",
 "check": "npm run format:check && npm run typecheck && npm run lint && npm test"
 ```
@@ -77,8 +77,6 @@ git commit -m "chore: align formatting with InvestMateMobile"
 **Files:**
 - Modify: `src/**/*.ts`
 - Modify: `src/**/*.tsx`
-- Modify: `app/**/*.ts`
-- Modify: `app/**/*.tsx`
 
 - [ ] **Step 1: Применить автоматические исправления**
 

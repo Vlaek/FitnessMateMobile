@@ -10,6 +10,7 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -32,11 +33,16 @@ export default function TabsLayout() {
           name={route.name}
           options={{
             title: t(route.translationKey),
-            tabBarIcon: ({ color }) => route.prominent ? (
-              <View style={[styles.startIcon, { backgroundColor: colors.primary }]}>
-                <Text style={[styles.startText, { color: colors.primaryText }]}>{route.icon}</Text>
-              </View>
-            ) : <Text style={[styles.icon, { color }]}>{route.icon}</Text>,
+            tabBarIcon: ({ color }) =>
+              route.prominent ? (
+                <View style={[styles.startIcon, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.startText, { color: colors.primaryText }]}>
+                    {route.icon}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={[styles.icon, { color }]}>{route.icon}</Text>
+              ),
           }}
         />
       ))}
@@ -45,7 +51,15 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  label: { fontSize: 11, fontWeight: '600' }, icon: { fontSize: 22 },
-  startIcon: { width: 44, height: 44, marginTop: -15, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  label: { fontSize: 11, fontWeight: '600' },
+  icon: { fontSize: 22 },
+  startIcon: {
+    width: 44,
+    height: 44,
+    marginTop: -15,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   startText: { fontSize: 30, lineHeight: 32, fontWeight: '500' },
 });

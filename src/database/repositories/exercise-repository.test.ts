@@ -7,24 +7,36 @@ describe('SqliteExerciseRepository', () => {
     const db = new FakeDatabase();
     db.queueAll([
       {
-        id: 'built-in', built_in_key: 'squat', custom_name: null,
-        muscle_group: 'legs', is_custom: 0,
+        id: 'built-in',
+        built_in_key: 'squat',
+        custom_name: null,
+        muscle_group: 'legs',
+        is_custom: 0,
       },
       {
-        id: 'custom', built_in_key: null, custom_name: 'Cable fly',
-        muscle_group: 'chest', is_custom: 1,
+        id: 'custom',
+        built_in_key: null,
+        custom_name: 'Cable fly',
+        muscle_group: 'chest',
+        is_custom: 1,
       },
     ]);
     const repository = new SqliteExerciseRepository(db);
 
     await expect(repository.listAll()).resolves.toEqual([
       {
-        id: 'built-in', builtInKey: 'squat', customName: null,
-        muscleGroup: 'legs', isCustom: false,
+        id: 'built-in',
+        builtInKey: 'squat',
+        customName: null,
+        muscleGroup: 'legs',
+        isCustom: false,
       },
       {
-        id: 'custom', builtInKey: null, customName: 'Cable fly',
-        muscleGroup: 'chest', isCustom: true,
+        id: 'custom',
+        builtInKey: null,
+        customName: 'Cable fly',
+        muscleGroup: 'chest',
+        isCustom: true,
       },
     ]);
   });

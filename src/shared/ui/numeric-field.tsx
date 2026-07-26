@@ -9,12 +9,7 @@ type Props = {
   integer?: boolean;
 };
 
-export function NumericField({
-  label,
-  value,
-  onValueChange,
-  integer = false,
-}: Props) {
+export function NumericField({ label, value, onValueChange, integer = false }: Props) {
   const [text, setText] = useState(formatNumber(value));
   const isEditing = useRef(false);
 
@@ -27,16 +22,17 @@ export function NumericField({
   const changeText = (next: string) => {
     setText(next);
     const normalized = next.replace(',', '.');
-    const sanitized = normalized.replace(integer ? /[^0-9]/g : /[^0-9.]/g, '');
 
-    if (sanitized === '') {
+    if (normalized === '') {
       onValueChange(0);
+
       return;
     }
 
-    const parsed = integer ? Number.parseInt(sanitized, 10) : Number(sanitized);
+    const parsed = Number(normalized);
+
     if (Number.isFinite(parsed)) {
-      onValueChange(Math.max(0, parsed));
+      onValueChange(Math.max(0, integer ? Math.trunc(parsed) : parsed));
     }
   };
 

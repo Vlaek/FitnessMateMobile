@@ -31,6 +31,7 @@ function makeRepository(db: FakeDatabase) {
     '55555555-5555-4555-8555-555555555555',
     '66666666-6666-4666-8666-666666666666',
   ];
+
   return new SqliteProgramRepository(db, {
     createId: () => ids.shift() ?? '77777777-7777-4777-8777-777777777777',
     now: () => '2026-07-20T10:00:00.000Z',
@@ -51,10 +52,12 @@ describe('SqliteProgramRepository', () => {
       name: 'Upper body',
     });
     expect(db.committedTransactions).toBe(1);
-    expect(db.queries.filter((query) => query.sql.includes('INSERT INTO program_exercises')))
-      .toHaveLength(2);
-    expect(db.queries.filter((query) => query.sql.includes('INSERT INTO program_sets')))
-      .toHaveLength(3);
+    expect(
+      db.queries.filter((query) => query.sql.includes('INSERT INTO program_exercises')),
+    ).toHaveLength(2);
+    expect(
+      db.queries.filter((query) => query.sql.includes('INSERT INTO program_sets')),
+    ).toHaveLength(3);
   });
 
   it('does not commit when a child insert fails', async () => {
@@ -70,8 +73,12 @@ describe('SqliteProgramRepository', () => {
   it('loads nested exercises and sets in order', async () => {
     const db = new FakeDatabase();
     db.queueFirst({
-      id: 'program', name: 'Upper body', description: 'Monday', sort_order: 2,
-      created_at: 'created', updated_at: 'updated',
+      id: 'program',
+      name: 'Upper body',
+      description: 'Monday',
+      sort_order: 2,
+      created_at: 'created',
+      updated_at: 'updated',
     });
     db.queueAll([
       { id: 'pe-1', exercise_id: 'exercise-1', sort_order: 0 },
