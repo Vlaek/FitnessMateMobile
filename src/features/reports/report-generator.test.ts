@@ -53,6 +53,38 @@ function workout(overrides: Partial<TWorkout> = {}): TWorkout {
 }
 
 describe('generateWorkoutReport', () => {
+  it('sorts by date when Array.prototype.toSorted is unavailable', () => {
+    const originalToSorted = Array.prototype.toSorted;
+    // React Native's JavaScript runtime may not provide this newer array method.
+    Object.defineProperty(Array.prototype, 'toSorted', { configurable: true, value: undefined });
+
+    try {
+      const earlyWorkout = workout({ id: 'early', name: 'Early workout' });
+      const lateWorkout = workout({
+        id: 'late',
+        name: 'Late workout',
+        startedAt: '2026-07-22T10:00:00.000Z',
+      });
+      const report = generateWorkoutReport({
+        workouts: [lateWorkout, earlyWorkout],
+        selectionOrder: ['late', 'early'],
+        sortMode: 'date',
+        title: '',
+        description: '',
+        weightUnit: 'kg',
+        locale: 'en',
+        labels,
+      });
+
+      expect(report.indexOf('Early workout')).toBeLessThan(report.indexOf('Late workout'));
+    } finally {
+      Object.defineProperty(Array.prototype, 'toSorted', {
+        configurable: true,
+        value: originalToSorted,
+      });
+    }
+  });
+
   it('groups matching completed sets in their first-seen order', () => {
     expect(
       generateWorkoutReport({

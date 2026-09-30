@@ -4,6 +4,7 @@ import { useAppTheme } from '@/shared/theme/use-app-theme';
 export function TextField({
   label,
   error,
+  style,
   ...props
 }: TextInputProps & { label: string; error?: string }) {
   const { colors } = useAppTheme();
@@ -21,6 +22,7 @@ export function TextField({
             borderColor: error ? colors.danger : colors.border,
             backgroundColor: colors.surface,
           },
+          style,
         ]}
         {...props}
       />

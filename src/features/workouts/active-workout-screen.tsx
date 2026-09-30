@@ -1,22 +1,28 @@
-import { randomUUID } from 'expo-crypto';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { exerciseDisplayName } from '@/domain/exercises/display-name';
-import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
 import { exerciseRepository } from '@/database/repositories/exercise-repository';
 import { workoutRepository } from '@/database/repositories/workout-repository';
+import { exerciseDisplayName } from '@/domain/exercises/display-name';
+import {
+  fromCanonicalKg,
+  getWeightUnitTranslationKey,
+  toCanonicalKg,
+} from '@/domain/units/weight';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { LoadingScreen } from '@/shared/ui/loading-screen';
+import { NumericField } from '@/shared/ui/numeric-field';
 import { Screen } from '@/shared/ui/screen';
-import { TextField } from '@/shared/ui/text-field';
+import { randomUUID } from 'expo-crypto';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ExercisePicker } from '../programs/editor/exercise-picker';
+import { sanitizeWorkout } from './sanitize-workout';
 import { useActiveWorkout } from './use-active-workout';
 
+/** Экран действующей тренировки */
 export function ActiveWorkoutScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
@@ -42,6 +48,7 @@ export function ActiveWorkoutScreen() {
   }
 
   const workout = state.workout;
+
   const setExercise = (
     index: number,
     transform: (value: (typeof workout.exercises)[number]) => (typeof workout.exercises)[number],
@@ -52,18 +59,27 @@ export function ActiveWorkoutScreen() {
         itemIndex === index ? transform(item) : item,
       ),
     });
+
   const finish = () =>
     Alert.alert(t('workout.finishTitle'), t('workout.finishBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('workout.finish'),
-        onPress: () =>
+        onPress: () => {
+          const validWorkout = sanitizeWorkout(workout);
+
+          if (!validWorkout) {
+            return;
+          }
+
           void workoutRepository
-            .save(workout)
-            .then(() => workoutRepository.complete(workout.id))
-            .then(() => router.replace('/(tabs)/history')),
+            .save(validWorkout)
+            .then(() => workoutRepository.complete(validWorkout.id))
+            .then(() => router.replace('/(tabs)/history'));
+        },
       },
     ]);
+
   const discard = () =>
     Alert.alert(t('workout.discardTitle'), t('workout.discardBody'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -79,22 +95,32 @@ export function ActiveWorkoutScreen() {
     <Screen scroll keyboardAware>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>{workout.name}</Text>
+
         <Pressable onPress={discard}>
           <Text style={{ color: colors.danger }}>{t('workout.discard')}</Text>
         </Pressable>
       </View>
-      <Text style={{ color: colors.textMuted }}>
+
+      <Text style={{ color: colors.textMuted, marginBottom: 10 }}>
         {new Date(workout.startedAt).toLocaleString()}
       </Text>
+
+      {/* Список упражнений */}
       {workout.exercises.map((exercise, exerciseIndex) => (
         <View
           key={exercise.id}
-          style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          style={[
+            styles.card,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            { marginBottom: exerciseIndex === workout.exercises.length - 1 ? 0 : 10 },
+          ]}
         >
           <View style={styles.header}>
+            {/* Название упражнения */}
             <Text style={[styles.exercise, { color: colors.text }]}>
               {t(`exercises.${exercise.exerciseName}`, { defaultValue: exercise.exerciseName })}
             </Text>
+
             <Button
               label={t('common.delete')}
               variant="ghost"
@@ -106,6 +132,8 @@ export function ActiveWorkoutScreen() {
               }
             />
           </View>
+
+          {/* Подходы упражнения */}
           {exercise.sets.map((set, setIndex) => (
             <View key={set.id} style={styles.setRow}>
               <Pressable
@@ -129,42 +157,42 @@ export function ActiveWorkoutScreen() {
               >
                 <Text style={{ color: '#fff' }}>{set.isCompleted ? '✓' : ''}</Text>
               </Pressable>
-              <TextField
-                label={`${t('editor.weight')} (${unit})`}
-                value={String(fromCanonicalKg(set.weightKg, unit))}
-                keyboardType="decimal-pad"
-                onChangeText={(text) =>
+
+              {/* Вес упражнения */}
+              <NumericField
+                label={`${t('editor.weight')} (${t(getWeightUnitTranslationKey(unit))})`}
+                value={fromCanonicalKg(set.weightKg, unit)}
+                onValueChange={(weight) =>
                   setExercise(exerciseIndex, (value) => ({
                     ...value,
                     sets: value.sets.map((item, i) =>
                       i === setIndex
                         ? {
                             ...item,
-                            weightKg: toCanonicalKg(
-                              Math.max(0, Number(text.replace(',', '.')) || 0),
-                              unit,
-                            ),
+                            weightKg: toCanonicalKg(weight, unit),
                           }
                         : item,
                     ),
                   }))
                 }
               />
-              <TextField
+
+              {/* Повторения упражнения */}
+              <NumericField
+                integer
                 label={t('editor.reps')}
-                value={String(set.repetitions)}
-                keyboardType="number-pad"
-                onChangeText={(text) =>
+                value={set.repetitions}
+                onValueChange={(repetitions) =>
                   setExercise(exerciseIndex, (value) => ({
                     ...value,
                     sets: value.sets.map((item, i) =>
-                      i === setIndex
-                        ? { ...item, repetitions: Math.max(1, Number.parseInt(text, 10) || 1) }
-                        : item,
+                      i === setIndex ? { ...item, repetitions } : item,
                     ),
                   }))
                 }
               />
+
+              {/* Удалить подход */}
               <Button
                 label="−"
                 variant="ghost"
@@ -178,6 +206,8 @@ export function ActiveWorkoutScreen() {
               />
             </View>
           ))}
+
+          {/* Добавить подход */}
           <Button
             label={t('editor.addSet')}
             variant="secondary"
@@ -197,8 +227,18 @@ export function ActiveWorkoutScreen() {
           />
         </View>
       ))}
-      <Button label={t('editor.addExercise')} variant="secondary" onPress={() => setPicker(true)} />
+
+      {/* Добавить упражнение */}
+      <Button
+        style={{ marginBottom: 10, marginTop: 10 }}
+        label={t('editor.addExercise')}
+        variant="secondary"
+        onPress={() => setPicker(true)}
+      />
+
       {state.error ? <Text style={{ color: colors.danger }}>{state.error}</Text> : null}
+
+      {/* Закончить тренировку */}
       <Button
         label={t('workout.finish')}
         disabled={
@@ -206,6 +246,8 @@ export function ActiveWorkoutScreen() {
         }
         onPress={finish}
       />
+
+      {/* Выбор упражнения */}
       <ExercisePicker
         visible={picker}
         exercises={state.exercises}

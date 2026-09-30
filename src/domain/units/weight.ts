@@ -1,5 +1,9 @@
 export type TWeightUnit = 'kg' | 'lb';
 
+export function getWeightUnitTranslationKey(unit: TWeightUnit): `common.${TWeightUnit}` {
+  return `common.${unit}`;
+}
+
 const POUNDS_PER_KILOGRAM = 2.2046226218;
 
 function assertWeight(value: number): void {

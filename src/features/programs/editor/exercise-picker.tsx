@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { exerciseDisplayName } from '@/domain/exercises/display-name';
 import type { TExercise, TMuscleGroup } from '@/domain/exercises/types';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { Screen } from '@/shared/ui/screen';
 import { TextField } from '@/shared/ui/text-field';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const groups: TMuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'other'];
 
@@ -40,7 +40,9 @@ export function ExercisePicker({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <Screen scroll keyboardAware>
         <Text style={[styles.title, { color: colors.text }]}>{t('editor.chooseExercise')}</Text>
+
         <TextField label={t('editor.searchExercise')} value={search} onChangeText={setSearch} />
+
         <ScrollView style={styles.list} nestedScrollEnabled>
           {filtered.map((item) => (
             <Pressable
@@ -57,9 +59,13 @@ export function ExercisePicker({
             </Pressable>
           ))}
         </ScrollView>
+
+        {/* Создать своё упражнение */}
         <Text style={[styles.subtitle, { color: colors.text }]}>{t('editor.customExercise')}</Text>
+
         <TextField label={t('editor.customName')} value={customName} onChangeText={setCustomName} />
-        <View style={styles.groups}>
+
+        <View style={[styles.groups, { marginTop: 10, marginBottom: 10 }]}>
           {groups.map((value) => (
             <Pressable
               key={value}
@@ -76,7 +82,9 @@ export function ExercisePicker({
             </Pressable>
           ))}
         </View>
+
         <Button
+          style={{ marginBottom: 10 }}
           label={t('common.create')}
           disabled={!customName.trim()}
           onPress={() =>
@@ -86,7 +94,13 @@ export function ExercisePicker({
             })
           }
         />
-        <Button label={t('common.close')} variant="secondary" onPress={onClose} />
+
+        <Button
+          style={{ marginBottom: 10 }}
+          label={t('common.close')}
+          variant="secondary"
+          onPress={onClose}
+        />
       </Screen>
     </Modal>
   );

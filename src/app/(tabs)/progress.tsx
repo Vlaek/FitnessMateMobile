@@ -1,9 +1,5 @@
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { database } from '@/database/client';
-import { fromCanonicalKg } from '@/domain/units/weight';
+import { fromCanonicalKg, getWeightUnitTranslationKey } from '@/domain/units/weight';
 import {
   calculateAnalytics,
   type TAnalytics,
@@ -14,6 +10,10 @@ import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { AppHeader } from '@/shared/ui/app-header';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { Screen } from '@/shared/ui/screen';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function ProgressScreen() {
   const { t } = useTranslation();
@@ -39,7 +39,7 @@ export default function ProgressScreen() {
             <Stat label={t('progress.totalWorkouts')} value={String(data.totalWorkouts)} />
             <Stat
               label={t('progress.weeklyVolume')}
-              value={`${fromCanonicalKg(data.weeklyVolumeKg, unit)} ${unit}`}
+              value={`${fromCanonicalKg(data.weeklyVolumeKg, unit)} ${t(getWeightUnitTranslationKey(unit))}`}
             />
           </View>
           <Text style={[styles.heading, { color: colors.text }]}>
@@ -54,15 +54,18 @@ export default function ProgressScreen() {
                 {t(`exercises.${record.exerciseName}`, { defaultValue: record.exerciseName })}
               </Text>
               <Text style={{ color: colors.text }}>
-                {t('progress.maxWeight')}: {fromCanonicalKg(record.maxWeightKg, unit)} {unit}
+                {t('progress.maxWeight')}: {fromCanonicalKg(record.maxWeightKg, unit)}{' '}
+                {t(getWeightUnitTranslationKey(unit))}
               </Text>
               <Text style={{ color: colors.text }}>
-                {t('progress.maxVolume')}: {fromCanonicalKg(record.maxSetVolumeKg, unit)} {unit}
+                {t('progress.maxVolume')}: {fromCanonicalKg(record.maxSetVolumeKg, unit)}{' '}
+                {t(getWeightUnitTranslationKey(unit))}
               </Text>
               {record.trend.map((point) => (
                 <Text key={point.date} style={{ color: colors.textMuted }}>
-                  {point.date}: {fromCanonicalKg(point.maxWeightKg, unit)} {unit} ·{' '}
-                  {fromCanonicalKg(point.volumeKg, unit)} {unit}
+                  {point.date.split('-').reverse().join('.')}: {fromCanonicalKg(point.maxWeightKg, unit)}{' '}
+                  {t(getWeightUnitTranslationKey(unit))} ·{' '}
+                  {fromCanonicalKg(point.volumeKg, unit)} {t(getWeightUnitTranslationKey(unit))}
                 </Text>
               ))}
             </View>

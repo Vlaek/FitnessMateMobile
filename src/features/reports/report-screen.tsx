@@ -1,7 +1,3 @@
-import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { Alert, Share, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import type { TWorkout } from '@/domain/workouts/types';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
@@ -11,13 +7,17 @@ import { ErrorScreen } from '@/shared/ui/error-screen';
 import { LoadingScreen } from '@/shared/ui/loading-screen';
 import { Screen } from '@/shared/ui/screen';
 import { TextField } from '@/shared/ui/text-field';
+import { router } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Share, StyleSheet, Text, View } from 'react-native';
+import { reportDraftStore, useReportDraftStore } from './report-draft-store';
 import {
   generateWorkoutReport,
   isTelegramMessageTooLong,
   TELEGRAM_MESSAGE_LIMIT,
   type TReportSortMode,
 } from './report-generator';
-import { reportDraftStore, useReportDraftStore } from './report-draft-store';
 import { telegramCredentials } from './telegram-credentials';
 import { sendTelegramMessage } from './telegram-service';
 
@@ -166,7 +166,9 @@ export function ReportScreen() {
   return (
     <Screen scroll keyboardAware contentStyle={styles.content}>
       <Text style={[styles.title, { color: colors.text }]}>{t('reports.create')}</Text>
+
       <TextField label={t('reports.title')} value={title} onChangeText={setTitle} />
+
       <TextField
         label={t('reports.description')}
         value={description}
@@ -176,6 +178,7 @@ export function ReportScreen() {
         textAlignVertical="top"
         style={styles.description}
       />
+
       <View style={styles.group}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('reports.sorting')}</Text>
         <View style={styles.sortActions}>
@@ -186,6 +189,7 @@ export function ReportScreen() {
               onPress={() => setSortMode('selection')}
             />
           </View>
+
           <View style={styles.sortAction}>
             <Button
               label={t('reports.byDate')}

@@ -3,7 +3,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { workoutRepository } from '@/database/repositories/workout-repository';
-import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
+import {
+  fromCanonicalKg,
+  getWeightUnitTranslationKey,
+  toCanonicalKg,
+} from '@/domain/units/weight';
 import type { TWorkout } from '@/domain/workouts/types';
 import { reportDraftStore } from '@/features/reports/report-draft-store';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
@@ -173,7 +177,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
                     <>
                       <View style={styles.field}>
                         <NumericField
-                          label={`${t('editor.weight')} (${unit})`}
+                          label={`${t('editor.weight')} (${t(getWeightUnitTranslationKey(unit))})`}
                           value={fromCanonicalKg(set.weightKg, unit)}
                           onValueChange={(value) =>
                             setExercise(exerciseIndex, (current) => ({
@@ -205,7 +209,8 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
                     </>
                   ) : (
                     <Text selectable style={[styles.value, { color: colors.text }]}>
-                      {fromCanonicalKg(set.weightKg, unit)} {unit} × {set.repetitions}
+                      {fromCanonicalKg(set.weightKg, unit)} {t(getWeightUnitTranslationKey(unit))} ×{' '}
+                      {set.repetitions}
                     </Text>
                   )}
                 </View>

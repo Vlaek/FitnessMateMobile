@@ -62,7 +62,7 @@ function sortWorkouts(
 
   const selectionIndexes = new Map(selectionOrder.map((id, index) => [id, index]));
 
-  return selected.toSorted((left, right) => {
+  return [...selected].sort((left, right) => {
     const dateDifference = new Date(left.startedAt).getTime() - new Date(right.startedAt).getTime();
 
     return dateDifference || selectionIndexes.get(left.id)! - selectionIndexes.get(right.id)!;

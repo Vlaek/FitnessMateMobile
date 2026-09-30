@@ -1,10 +1,9 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { GestureDetector } from 'react-native-gesture-handler';
 import { exerciseDisplayName } from '@/domain/exercises/display-name';
-import { fromCanonicalKg, toCanonicalKg } from '@/domain/units/weight';
+import {
+  fromCanonicalKg,
+  getWeightUnitTranslationKey,
+  toCanonicalKg,
+} from '@/domain/units/weight';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
@@ -14,6 +13,11 @@ import { NumericField } from '@/shared/ui/numeric-field';
 import { Screen } from '@/shared/ui/screen';
 import { SortableList } from '@/shared/ui/sortable-list';
 import { TextField } from '@/shared/ui/text-field';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import { ExercisePicker } from './exercise-picker';
 import {
   addExercise,
@@ -120,7 +124,7 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
                     </Text>
                     <View style={styles.field}>
                       <NumericField
-                        label={`${t('editor.weight')} (${unit})`}
+                        label={`${t('editor.weight')} (${t(getWeightUnitTranslationKey(unit))})`}
                         value={fromCanonicalKg(set.weightKg, unit)}
                         onValueChange={(value) =>
                           editor.setDraft(
@@ -170,7 +174,13 @@ export function ProgramEditorScreen({ programId }: { programId?: string }) {
         }}
       />
 
-      <Button label={t('editor.addExercise')} variant="secondary" onPress={() => setPicker(true)} />
+      <Button
+        style={{ marginBottom: 5 }}
+        label={t('editor.addExercise')}
+        variant="secondary"
+        onPress={() => setPicker(true)}
+      />
+
       {editor.error ? (
         <Text selectable style={{ color: colors.danger }}>
           {editor.error}

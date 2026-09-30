@@ -4,7 +4,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TWorkoutSummary } from '@/domain/workouts/types';
 import { workoutRepository } from '@/database/repositories/workout-repository';
-import { fromCanonicalKg } from '@/domain/units/weight';
+import { fromCanonicalKg, getWeightUnitTranslationKey } from '@/domain/units/weight';
 import { reportDraftStore } from '@/features/reports/report-draft-store';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
@@ -96,7 +96,8 @@ export default function HistoryScreen() {
                   {item.setCount} {t('programs.sets')}
                 </Text>
                 <Text style={{ color: colors.textMuted }}>
-                  {t('history.volume')}: {fromCanonicalKg(item.volumeKg, unit)} {unit}
+                  {t('history.volume')}: {fromCanonicalKg(item.volumeKg, unit)}{' '}
+                  {t(getWeightUnitTranslationKey(unit))}
                 </Text>
               </View>
               {selectionMode && selectedIds.includes(item.id) ? (

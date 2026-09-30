@@ -4,6 +4,7 @@ import type { TExercise } from '@/domain/exercises/types';
 import type { TWorkout } from '@/domain/workouts/types';
 import { exerciseRepository } from '@/database/repositories/exercise-repository';
 import { workoutRepository } from '@/database/repositories/workout-repository';
+import { sanitizeWorkout } from './sanitize-workout';
 
 export function useActiveWorkout() {
   const [workout, setWorkoutState] = useState<TWorkout | null>(null);
@@ -29,9 +30,13 @@ export function useActiveWorkout() {
       return;
     }
 
-    saveQueue.current = saveQueue.current
-      .then(() => workoutRepository.save(next))
-      .catch((cause) => setError(String(cause)));
+    const validWorkout = sanitizeWorkout(next);
+
+    if (validWorkout) {
+      saveQueue.current = saveQueue.current
+        .then(() => workoutRepository.save(validWorkout))
+        .catch((cause) => setError(String(cause)));
+    }
   }, []);
   const addExercise = (exercise: TExercise, displayName: string) => {
     if (!workout) {

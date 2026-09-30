@@ -1,4 +1,4 @@
-import { fromCanonicalKg, toCanonicalKg } from './weight';
+import { fromCanonicalKg, getWeightUnitTranslationKey, toCanonicalKg } from './weight';
 
 describe('weight conversion', () => {
   it('keeps kilograms canonical', () => {
@@ -17,5 +17,14 @@ describe('weight conversion', () => {
     expect(() => toCanonicalKg(Number.NaN, 'lb')).toThrow(
       'Weight must be a finite non-negative number',
     );
+  });
+});
+
+describe('weight unit translation', () => {
+  it.each([
+    ['kg', 'common.kg'],
+    ['lb', 'common.lb'],
+  ] as const)('maps %s to %s', (unit, key) => {
+    expect(getWeightUnitTranslationKey(unit)).toBe(key);
   });
 });
