@@ -87,6 +87,11 @@ export const ru: TTranslationShape<typeof en> = {
     discardBody: 'Текущая тренировка будет удалена.',
     completedSets: 'выполненных подходов',
   },
+  restTimer: {
+    until: 'Отдых до {{time}}',
+    stop: 'Остановить',
+    complete: 'Время отдыха закончилось',
+  },
   history: {
     title: 'История',
     emptyTitle: 'История пуста',
@@ -168,6 +173,13 @@ export const ru: TTranslationShape<typeof en> = {
     telegramSaved: 'Настройки Telegram сохранены',
     telegramRemoved: 'Настройки Telegram удалены',
     telegramError: 'Не удалось обновить настройки Telegram.',
+    restTimer: 'Таймер отдыха',
+    restTimerOn: 'Включён',
+    restTimerOff: 'Выключен',
+    restTimerDuration: 'Длительность',
+    decreaseRestTimer: 'Уменьшить на 30 секунд',
+    increaseRestTimer: 'Увеличить на 30 секунд',
+    notificationPermissionDenied: 'Для таймера отдыха требуется разрешение на уведомления.',
   },
   muscleGroups: {
     chest: 'Грудь',

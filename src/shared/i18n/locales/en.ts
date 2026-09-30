@@ -89,6 +89,11 @@ export const en = {
     discardBody: 'This draft will be deleted.',
     completedSets: 'completed sets',
   },
+  restTimer: {
+    until: 'Rest until {{time}}',
+    stop: 'Stop',
+    complete: 'Rest time is over',
+  },
   history: {
     title: 'History',
     emptyTitle: 'No workout history',
@@ -170,6 +175,13 @@ export const en = {
     telegramSaved: 'Telegram settings saved',
     telegramRemoved: 'Telegram settings removed',
     telegramError: 'Could not update Telegram settings.',
+    restTimer: 'Rest timer',
+    restTimerOn: 'On',
+    restTimerOff: 'Off',
+    restTimerDuration: 'Duration',
+    decreaseRestTimer: 'Decrease by 30 seconds',
+    increaseRestTimer: 'Increase by 30 seconds',
+    notificationPermissionDenied: 'Notification permission is required for the rest timer.',
   },
   muscleGroups: {
     chest: 'Chest',

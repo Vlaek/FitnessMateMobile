@@ -1,4 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker';
+import { Host, Switch } from '@expo/ui';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -10,11 +11,16 @@ import {
   restoreBackup,
 } from '@/features/backup/backup-service';
 import { telegramCredentials } from '@/features/reports/telegram-credentials';
+import { restTimerService } from '@/features/rest-timer/rest-timer-service';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { Screen } from '@/shared/ui/screen';
 import { TextField } from '@/shared/ui/text-field';
-import { usePreferencesStore } from './preferences-store';
+import {
+  MAX_REST_TIMER_SECONDS,
+  MIN_REST_TIMER_SECONDS,
+  usePreferencesStore,
+} from './preferences-store';
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -25,6 +31,10 @@ export function SettingsScreen() {
   const setUnit = usePreferencesStore((s) => s.setWeightUnit);
   const theme = usePreferencesStore((s) => s.themeMode);
   const setTheme = usePreferencesStore((s) => s.setThemeMode);
+  const restTimerEnabled = usePreferencesStore((s) => s.restTimerEnabled);
+  const setRestTimerEnabled = usePreferencesStore((s) => s.setRestTimerEnabled);
+  const restTimerDurationSeconds = usePreferencesStore((s) => s.restTimerDurationSeconds);
+  const setRestTimerDurationSeconds = usePreferencesStore((s) => s.setRestTimerDurationSeconds);
   const reset = usePreferencesStore((s) => s.reset);
   const [telegramToken, setTelegramToken] = useState('');
   const [telegramChatId, setTelegramChatId] = useState('');
@@ -32,6 +42,31 @@ export function SettingsScreen() {
   const [telegramConfigured, setTelegramConfigured] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(true);
   const [telegramSaving, setTelegramSaving] = useState(false);
+  const [restTimerUpdating, setRestTimerUpdating] = useState(false);
+
+  const updateRestTimerEnabled = async (enabled: boolean) => {
+    if (!enabled) {
+      setRestTimerEnabled(false);
+      await restTimerService.stop();
+      return;
+    }
+
+    setRestTimerUpdating(true);
+    try {
+      const granted = await restTimerService.requestPermission();
+      if (granted) {
+        setRestTimerEnabled(true);
+      } else {
+        setRestTimerEnabled(false);
+        Alert.alert(t('settings.notificationPermissionDenied'));
+      }
+    } catch {
+      setRestTimerEnabled(false);
+      Alert.alert(t('settings.notificationPermissionDenied'));
+    } finally {
+      setRestTimerUpdating(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -199,6 +234,45 @@ export function SettingsScreen() {
         ]}
         onChange={(value) => setTheme(value as 'system' | 'light' | 'dark')}
       />
+      <View style={styles.restTimerSection}>
+        <View style={styles.restTimerHeading}>
+          <View style={styles.restTimerLabel}>
+            <Text style={[styles.section, { color: colors.text }]}>{t('settings.restTimer')}</Text>
+            <Text style={{ color: colors.textMuted }}>
+              {restTimerEnabled ? t('settings.restTimerOn') : t('settings.restTimerOff')}
+            </Text>
+          </View>
+          <Host matchContents>
+            <Switch
+              testID="rest-timer-switch"
+              label={t('settings.restTimer')}
+              value={restTimerEnabled}
+              disabled={restTimerUpdating}
+              onValueChange={(enabled) => void updateRestTimerEnabled(enabled)}
+            />
+          </Host>
+        </View>
+        <Text style={{ color: colors.textMuted }}>{t('settings.restTimerDuration')}</Text>
+        <View style={styles.restTimerDuration}>
+          <Button
+            label="−30 sec"
+            variant="secondary"
+            accessibilityLabel={t('settings.decreaseRestTimer')}
+            disabled={restTimerDurationSeconds <= MIN_REST_TIMER_SECONDS}
+            onPress={() => setRestTimerDurationSeconds(restTimerDurationSeconds - 30)}
+          />
+          <Text style={[styles.restTimerValue, { color: colors.text }]}>
+            {formatDuration(restTimerDurationSeconds)}
+          </Text>
+          <Button
+            label="+30 sec"
+            variant="secondary"
+            accessibilityLabel={t('settings.increaseRestTimer')}
+            disabled={restTimerDurationSeconds >= MAX_REST_TIMER_SECONDS}
+            onPress={() => setRestTimerDurationSeconds(restTimerDurationSeconds + 30)}
+          />
+        </View>
+      </View>
       <View style={styles.telegramSection}>
         <View style={styles.telegramHeading}>
           <Text style={[styles.section, { color: colors.text }]}>{t('settings.telegram')}</Text>
@@ -313,6 +387,10 @@ async function run(task: () => Promise<void>, success: string) {
     Alert.alert(cause instanceof Error ? cause.message : String(cause));
   }
 }
+function formatDuration(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
+}
 const styles = StyleSheet.create({
   content: { gap: 24 },
   header: { flexDirection: 'row', alignItems: 'center' },
@@ -326,4 +404,14 @@ const styles = StyleSheet.create({
   telegramSection: { gap: 12, paddingTop: 8 },
   telegramHeading: { gap: 4 },
   telegramActions: { gap: 10 },
+  restTimerSection: { gap: 12 },
+  restTimerHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  restTimerLabel: { flex: 1, gap: 4 },
+  restTimerDuration: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  restTimerValue: { minWidth: 56, textAlign: 'center', fontSize: 20, fontWeight: '800' },
 });
