@@ -7,6 +7,7 @@ import {
   toCanonicalKg,
 } from '@/domain/units/weight';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
+import { restTimerService } from '@/features/rest-timer/rest-timer-service';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { EmptyState } from '@/shared/ui/empty-state';
@@ -27,6 +28,8 @@ export function ActiveWorkoutScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const unit = usePreferencesStore((s) => s.weightUnit);
+  const restTimerEnabled = usePreferencesStore((s) => s.restTimerEnabled);
+  const restTimerDurationSeconds = usePreferencesStore((s) => s.restTimerDurationSeconds);
   const state = useActiveWorkout();
   const [picker, setPicker] = useState(false);
 
@@ -59,6 +62,20 @@ export function ActiveWorkoutScreen() {
         itemIndex === index ? transform(item) : item,
       ),
     });
+
+  const toggleSet = (exerciseIndex: number, setIndex: number) => {
+    const currentSet = workout.exercises[exerciseIndex]!.sets[setIndex]!;
+    const isCompleted = !currentSet.isCompleted;
+
+    setExercise(exerciseIndex, (value) => ({
+      ...value,
+      sets: value.sets.map((item, i) => (i === setIndex ? { ...item, isCompleted } : item)),
+    }));
+
+    if (isCompleted && restTimerEnabled) {
+      void restTimerService.start(restTimerDurationSeconds).catch(() => undefined);
+    }
+  };
 
   const finish = () =>
     Alert.alert(t('workout.finishTitle'), t('workout.finishBody'), [
@@ -139,14 +156,7 @@ export function ActiveWorkoutScreen() {
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: set.isCompleted }}
-                onPress={() =>
-                  setExercise(exerciseIndex, (value) => ({
-                    ...value,
-                    sets: value.sets.map((item, i) =>
-                      i === setIndex ? { ...item, isCompleted: !item.isCompleted } : item,
-                    ),
-                  }))
-                }
+                onPress={() => toggleSet(exerciseIndex, setIndex)}
                 style={[
                   styles.check,
                   {
