@@ -21,6 +21,8 @@ describe('preferences store', () => {
       language: 'en',
       weightUnit: 'lb',
       themeMode: 'system',
+      restTimerEnabled: false,
+      restTimerDurationSeconds: 180,
     });
   });
 
@@ -40,10 +42,23 @@ describe('preferences store', () => {
     store.getState().setLanguage('en');
     store.getState().setWeightUnit('lb');
     store.getState().setThemeMode('dark');
+    store.getState().setRestTimerEnabled(true);
+    store.getState().setRestTimerDurationSeconds(10);
     expect(store.getState()).toMatchObject({
       language: 'en',
       weightUnit: 'lb',
       themeMode: 'dark',
+      restTimerEnabled: true,
+      restTimerDurationSeconds: 30,
+    });
+
+    store.getState().setRestTimerDurationSeconds(900);
+    expect(store.getState().restTimerDurationSeconds).toBe(600);
+
+    store.getState().reset();
+    expect(store.getState()).toMatchObject({
+      restTimerEnabled: false,
+      restTimerDurationSeconds: 180,
     });
   });
 });

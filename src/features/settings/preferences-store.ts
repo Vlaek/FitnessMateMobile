@@ -9,6 +9,10 @@ export type TAppLanguage = 'ru' | 'en';
 
 export type TThemeMode = 'system' | 'light' | 'dark';
 
+export const MIN_REST_TIMER_SECONDS = 30;
+export const MAX_REST_TIMER_SECONDS = 600;
+export const DEFAULT_REST_TIMER_SECONDS = 180;
+
 export type TDeviceLocale = {
   languageCode: string | null;
   measurementSystem: 'metric' | 'us' | 'uk' | null;
@@ -18,9 +22,13 @@ export type TPreferencesState = {
   language: TAppLanguage;
   weightUnit: TWeightUnit;
   themeMode: TThemeMode;
+  restTimerEnabled: boolean;
+  restTimerDurationSeconds: number;
   setLanguage: (language: TAppLanguage) => void;
   setWeightUnit: (weightUnit: TWeightUnit) => void;
   setThemeMode: (themeMode: TThemeMode) => void;
+  setRestTimerEnabled: (restTimerEnabled: boolean) => void;
+  setRestTimerDurationSeconds: (restTimerDurationSeconds: number) => void;
   reset: () => void;
 };
 
@@ -29,6 +37,8 @@ function defaults(locale: TDeviceLocale) {
     language: locale.languageCode === 'en' ? ('en' as const) : ('ru' as const),
     weightUnit: locale.measurementSystem === 'us' ? ('lb' as const) : ('kg' as const),
     themeMode: 'system' as const,
+    restTimerEnabled: false,
+    restTimerDurationSeconds: DEFAULT_REST_TIMER_SECONDS,
   };
 }
 
@@ -45,15 +55,31 @@ export function createPreferencesStore(
         setLanguage: (language) => set({ language }),
         setWeightUnit: (weightUnit) => set({ weightUnit }),
         setThemeMode: (themeMode) => set({ themeMode }),
+        setRestTimerEnabled: (restTimerEnabled) => set({ restTimerEnabled }),
+        setRestTimerDurationSeconds: (restTimerDurationSeconds) =>
+          set({
+            restTimerDurationSeconds: Math.min(
+              MAX_REST_TIMER_SECONDS,
+              Math.max(MIN_REST_TIMER_SECONDS, restTimerDurationSeconds),
+            ),
+          }),
         reset: () => set(initial),
       }),
       {
         name: 'fitnessmate-preferences',
         storage: createJSONStorage(() => storage),
-        partialize: ({ language, weightUnit, themeMode }) => ({
+        partialize: ({
           language,
           weightUnit,
           themeMode,
+          restTimerEnabled,
+          restTimerDurationSeconds,
+        }) => ({
+          language,
+          weightUnit,
+          themeMode,
+          restTimerEnabled,
+          restTimerDurationSeconds,
         }),
       },
     ),
