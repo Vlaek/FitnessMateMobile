@@ -21,10 +21,33 @@ if (Notifications && TaskManager && !TaskManager.isTaskDefined(REST_TIMER_TASK_N
   TaskManager.defineTask<NotificationTaskPayload>(REST_TIMER_TASK_NAME, async ({ data }) => {
     if ('actionIdentifier' in data && data.actionIdentifier === REST_TIMER_STOP_ACTION_ID) {
       await restTimerService.stop();
+    } else if (!('actionIdentifier' in data)) {
+      const notificationData = parseNotificationData(data.data);
+
+      if (
+        notificationData.kind === 'restTimerComplete' &&
+        typeof notificationData.activeNotificationId === 'string'
+      ) {
+        await restTimerService.dismissActive(notificationData.activeNotificationId);
+      }
     }
 
     return Notifications.BackgroundNotificationTaskResult.NoData;
   });
+}
+
+function parseNotificationData(data: Record<string, unknown>): Record<string, unknown> {
+  if (typeof data.dataString !== 'string') {
+    return data;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(data.dataString);
+
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
 }
 
 export async function registerRestTimer() {

@@ -72,6 +72,18 @@ async function stop() {
   }
 }
 
+async function dismissActive(notificationId: string) {
+  if (!canUseNotifications()) {
+    return;
+  }
+
+  if (activeNotificationId === notificationId) {
+    activeNotificationId = null;
+  }
+
+  await getNotifications().dismissNotificationAsync(notificationId).catch(() => undefined);
+}
+
 async function start(durationSeconds: number, now = new Date()) {
   if (!canUseNotifications()) {
     return;
@@ -100,10 +112,9 @@ async function start(durationSeconds: number, now = new Date()) {
   });
 
   completionNotificationId = await Notifications.scheduleNotificationAsync({
-    identifier: activeNotificationId,
     content: {
       title: i18n.t('restTimer.complete'),
-      data: { kind: 'restTimerComplete' },
+      data: { kind: 'restTimerComplete', activeNotificationId },
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
@@ -114,6 +125,7 @@ async function start(durationSeconds: number, now = new Date()) {
 }
 
 export const restTimerService = {
+  dismissActive,
   isAvailable: canUseNotifications,
   requestPermission,
   start,

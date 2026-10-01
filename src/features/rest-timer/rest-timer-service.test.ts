@@ -85,9 +85,14 @@ describe('restTimerService', () => {
     expect(mockNotifications.scheduleNotificationAsync).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        identifier: 'active-id',
+        content: expect.objectContaining({
+          data: expect.objectContaining({ activeNotificationId: 'active-id' }),
+        }),
         trigger: expect.objectContaining({ seconds: 180, channelId: REST_TIMER_CHANNEL_ID }),
       }),
+    );
+    expect(mockNotifications.scheduleNotificationAsync.mock.calls[1]?.[0].identifier).not.toBe(
+      'active-id',
     );
   });
 

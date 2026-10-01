@@ -23,7 +23,7 @@ jest.mock('expo-task-manager', () => ({
 
 jest.mock('./rest-timer-service', () => ({
   REST_TIMER_STOP_ACTION_ID: 'stop-rest-timer',
-  restTimerService: { stop: jest.fn() },
+  restTimerService: { dismissActive: jest.fn(), stop: jest.fn() },
 }));
 
 const taskExecutor = jest.mocked(TaskManager.defineTask).mock.calls[0]?.[1];
@@ -45,6 +45,24 @@ describe('registerRestTimer', () => {
     });
 
     expect(restTimerService.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('dismisses the active notification when the completion notification arrives', async () => {
+    await taskExecutor?.({
+      data: {
+        notification: {},
+        data: {
+          dataString: JSON.stringify({
+            kind: 'restTimerComplete',
+            activeNotificationId: 'active-id',
+          }),
+        },
+      },
+      error: null,
+      executionInfo: { taskName: 'fitnessmate-rest-timer', eventId: 'event-2' },
+    });
+
+    expect(restTimerService.dismissActive).toHaveBeenCalledWith('active-id');
   });
 
   it('registers the task once on Android', async () => {
