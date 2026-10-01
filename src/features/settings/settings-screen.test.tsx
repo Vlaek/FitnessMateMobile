@@ -1,4 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Alert, Linking } from 'react-native';
 import { telegramCredentials } from '@/features/reports/telegram-credentials';
 import { restTimerService } from '@/features/rest-timer/rest-timer-service';
 import { setAppLanguage } from '@/shared/i18n';
@@ -25,6 +26,7 @@ jest.mock('@/features/reports/telegram-credentials', () => ({
 
 jest.mock('@/features/rest-timer/rest-timer-service', () => ({
   restTimerService: {
+    isAvailable: jest.fn(),
     requestPermission: jest.fn(),
     stop: jest.fn(),
   },
@@ -53,6 +55,7 @@ describe('SettingsScreen', () => {
     jest.mocked(telegramCredentials.save).mockResolvedValue();
     jest.mocked(telegramCredentials.clear).mockResolvedValue();
     jest.mocked(restTimerService.requestPermission).mockResolvedValue(true);
+    jest.mocked(restTimerService.isAvailable).mockReturnValue(true);
     jest.mocked(restTimerService.stop).mockResolvedValue();
     preferencesStore.setState({ restTimerEnabled: false, restTimerDurationSeconds: 180 });
   });
@@ -98,6 +101,7 @@ describe('SettingsScreen', () => {
   });
 
   it('enables the rest timer only after notification permission is granted', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation();
     jest.mocked(restTimerService.requestPermission).mockResolvedValueOnce(false);
     const view = await render(<SettingsScreen />);
 
@@ -108,10 +112,31 @@ describe('SettingsScreen', () => {
     await waitFor(() => expect(restTimerService.requestPermission).toHaveBeenCalledTimes(1));
     expect(preferencesStore.getState().restTimerEnabled).toBe(false);
 
+    const permissionAlert = alert.mock.calls.at(-1);
+    const settingsAction = permissionAlert?.[2]?.find((action) => action.text === 'Open settings');
+    const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
+
+    settingsAction?.onPress?.();
+    expect(openSettings).toHaveBeenCalledTimes(1);
+
     jest.mocked(restTimerService.requestPermission).mockResolvedValueOnce(true);
     await fireEvent(view.getByTestId('rest-timer-switch'), 'valueChange', true);
 
     await waitFor(() => expect(preferencesStore.getState().restTimerEnabled).toBe(true));
+  });
+
+  it('explains that notifications are unavailable in Expo Go', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation();
+    jest.mocked(restTimerService.isAvailable).mockReturnValue(false);
+    const view = await render(<SettingsScreen />);
+
+    await fireEvent(view.getByTestId('rest-timer-switch'), 'valueChange', true);
+
+    expect(restTimerService.requestPermission).not.toHaveBeenCalled();
+    expect(alert).toHaveBeenLastCalledWith(
+      'Rest timer',
+      'Notifications are unavailable in Expo Go. Install a development or production build.',
+    );
   });
 
   it('changes rest duration in 30-second steps', async () => {

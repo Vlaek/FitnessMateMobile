@@ -113,4 +113,9 @@ async function start(durationSeconds: number, now = new Date()) {
   });
 }
 
-export const restTimerService = { requestPermission, start, stop };
+export const restTimerService = {
+  isAvailable: canUseNotifications,
+  requestPermission,
+  start,
+  stop,
+};

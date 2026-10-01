@@ -1,8 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import { Platform } from 'react-native';
-import { restTimerService } from './rest-timer-service';
 import { registerRestTimer } from './register-rest-timer';
+import { restTimerService } from './rest-timer-service';
 
 jest.mock('expo-constants', () => ({
   __esModule: true,

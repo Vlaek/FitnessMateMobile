@@ -1,9 +1,3 @@
-import * as DocumentPicker from 'expo-document-picker';
-import { Host, Switch } from '@expo/ui';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import {
   clearAllData,
   exportBackup,
@@ -16,6 +10,12 @@ import { useAppTheme } from '@/shared/theme/use-app-theme';
 import { Button } from '@/shared/ui/button';
 import { Screen } from '@/shared/ui/screen';
 import { TextField } from '@/shared/ui/text-field';
+import { Host, Switch } from '@expo/ui';
+import * as DocumentPicker from 'expo-document-picker';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   MAX_REST_TIMER_SECONDS,
   MIN_REST_TIMER_SECONDS,
@@ -44,10 +44,25 @@ export function SettingsScreen() {
   const [telegramSaving, setTelegramSaving] = useState(false);
   const [restTimerUpdating, setRestTimerUpdating] = useState(false);
 
+  const showNotificationPermissionAlert = () =>
+    Alert.alert(t('settings.restTimer'), t('settings.notificationPermissionDenied'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('settings.openSettings'),
+        onPress: () => void Linking.openSettings(),
+      },
+    ]);
+
   const updateRestTimerEnabled = async (enabled: boolean) => {
     if (!enabled) {
       setRestTimerEnabled(false);
       await restTimerService.stop();
+
+      return;
+    }
+
+    if (!restTimerService.isAvailable()) {
+      Alert.alert(t('settings.restTimer'), t('settings.restTimerUnavailable'));
 
       return;
     }
@@ -61,11 +76,11 @@ export function SettingsScreen() {
         setRestTimerEnabled(true);
       } else {
         setRestTimerEnabled(false);
-        Alert.alert(t('settings.notificationPermissionDenied'));
+        showNotificationPermissionAlert();
       }
     } catch {
       setRestTimerEnabled(false);
-      Alert.alert(t('settings.notificationPermissionDenied'));
+      showNotificationPermissionAlert();
     } finally {
       setRestTimerUpdating(false);
     }
@@ -248,17 +263,19 @@ export function SettingsScreen() {
           <Host matchContents>
             <Switch
               testID="rest-timer-switch"
-              label={t('settings.restTimer')}
+              // label={t('settings.restTimer')}
               value={restTimerEnabled}
               disabled={restTimerUpdating}
               onValueChange={(enabled) => void updateRestTimerEnabled(enabled)}
             />
           </Host>
         </View>
-        <Text style={{ color: colors.textMuted }}>{t('settings.restTimerDuration')}</Text>
+        <Text style={[styles.section, { color: colors.text }]}>
+          {t('settings.restTimerDuration')}
+        </Text>
         <View style={styles.restTimerDuration}>
           <Button
-            label="−30 sec"
+            label={`-30 ${t('common.sec')}`}
             variant="secondary"
             accessibilityLabel={t('settings.decreaseRestTimer')}
             disabled={restTimerDurationSeconds <= MIN_REST_TIMER_SECONDS}
@@ -268,7 +285,7 @@ export function SettingsScreen() {
             {formatDuration(restTimerDurationSeconds)}
           </Text>
           <Button
-            label="+30 sec"
+            label={`+30 ${t('common.sec')}`}
             variant="secondary"
             accessibilityLabel={t('settings.increaseRestTimer')}
             disabled={restTimerDurationSeconds >= MAX_REST_TIMER_SECONDS}

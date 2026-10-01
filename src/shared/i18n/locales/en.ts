@@ -21,6 +21,7 @@ export const en = {
     moveDown: 'Move down',
     kg: 'kg',
     lb: 'lb',
+    sec: 'sec',
   },
   nav: {
     home: 'Home',
@@ -182,6 +183,9 @@ export const en = {
     decreaseRestTimer: 'Decrease by 30 seconds',
     increaseRestTimer: 'Increase by 30 seconds',
     notificationPermissionDenied: 'Notification permission is required for the rest timer.',
+    restTimerUnavailable:
+      'Notifications are unavailable in Expo Go. Install a development or production build.',
+    openSettings: 'Open settings',
   },
   muscleGroups: {
     chest: 'Chest',

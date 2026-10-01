@@ -19,6 +19,7 @@ export const ru: TTranslationShape<typeof en> = {
     moveDown: 'Переместить ниже',
     kg: 'кг',
     lb: 'фунт',
+    sec: 'сек',
   },
   nav: {
     home: 'Главная',
@@ -180,6 +181,9 @@ export const ru: TTranslationShape<typeof en> = {
     decreaseRestTimer: 'Уменьшить на 30 секунд',
     increaseRestTimer: 'Увеличить на 30 секунд',
     notificationPermissionDenied: 'Для таймера отдыха требуется разрешение на уведомления.',
+    restTimerUnavailable:
+      'Уведомления недоступны в Expo Go. Установите development- или production-сборку.',
+    openSettings: 'Открыть настройки',
   },
   muscleGroups: {
     chest: 'Грудь',
