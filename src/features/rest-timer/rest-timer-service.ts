@@ -5,9 +5,8 @@ import { i18n } from '@/shared/i18n';
 export const REST_TIMER_CHANNEL_ID = 'rest-timer';
 export const REST_TIMER_CATEGORY_ID = 'resttimer';
 export const REST_TIMER_STOP_ACTION_ID = 'stop-rest-timer';
-
-let activeNotificationId: string | null = null;
-let completionNotificationId: string | null = null;
+export const REST_TIMER_ACTIVE_NOTIFICATION_ID = 'fitnessmate-rest-timer-active';
+export const REST_TIMER_COMPLETION_NOTIFICATION_ID = 'fitnessmate-rest-timer-completion';
 
 function canUseNotifications() {
   return (
@@ -58,18 +57,12 @@ async function stop() {
   }
 
   const Notifications = getNotifications();
-  const completionId = completionNotificationId;
-  const activeId = activeNotificationId;
-  completionNotificationId = null;
-  activeNotificationId = null;
-
-  if (completionId) {
-    await Notifications.cancelScheduledNotificationAsync(completionId).catch(() => undefined);
-  }
-
-  if (activeId) {
-    await Notifications.dismissNotificationAsync(activeId).catch(() => undefined);
-  }
+  await Notifications.cancelScheduledNotificationAsync(REST_TIMER_COMPLETION_NOTIFICATION_ID).catch(
+    () => undefined,
+  );
+  await Notifications.dismissNotificationAsync(REST_TIMER_ACTIVE_NOTIFICATION_ID).catch(
+    () => undefined,
+  );
 }
 
 async function dismissActive(notificationId: string) {
@@ -77,11 +70,9 @@ async function dismissActive(notificationId: string) {
     return;
   }
 
-  if (activeNotificationId === notificationId) {
-    activeNotificationId = null;
-  }
-
-  await getNotifications().dismissNotificationAsync(notificationId).catch(() => undefined);
+  await getNotifications()
+    .dismissNotificationAsync(notificationId)
+    .catch(() => undefined);
 }
 
 async function start(durationSeconds: number, now = new Date()) {
@@ -99,7 +90,8 @@ async function start(durationSeconds: number, now = new Date()) {
     minute: '2-digit',
   });
 
-  activeNotificationId = await Notifications.scheduleNotificationAsync({
+  await Notifications.scheduleNotificationAsync({
+    identifier: REST_TIMER_ACTIVE_NOTIFICATION_ID,
     content: {
       title: i18n.t('settings.restTimer'),
       body: i18n.t('restTimer.until', { time }),
@@ -111,10 +103,14 @@ async function start(durationSeconds: number, now = new Date()) {
     trigger: null,
   });
 
-  completionNotificationId = await Notifications.scheduleNotificationAsync({
+  await Notifications.scheduleNotificationAsync({
+    identifier: REST_TIMER_COMPLETION_NOTIFICATION_ID,
     content: {
       title: i18n.t('restTimer.complete'),
-      data: { kind: 'restTimerComplete', activeNotificationId },
+      data: {
+        kind: 'restTimerComplete',
+        activeNotificationId: REST_TIMER_ACTIVE_NOTIFICATION_ID,
+      },
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,

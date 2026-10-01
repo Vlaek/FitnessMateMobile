@@ -28,9 +28,8 @@ jest.mock('@/shared/i18n', () => ({
 const mockNotifications = jest.mocked(Notifications);
 
 describe('restTimerService', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.replaceProperty(Platform, 'OS', 'android');
-    await restTimerService.stop();
     mockNotifications.getPermissionsAsync.mockReset();
     mockNotifications.requestPermissionsAsync.mockReset();
     mockNotifications.setNotificationChannelAsync.mockReset();
@@ -80,19 +79,22 @@ describe('restTimerService', () => {
     );
     expect(mockNotifications.scheduleNotificationAsync).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ trigger: null }),
+      expect.objectContaining({
+        identifier: 'fitnessmate-rest-timer-active',
+        trigger: null,
+      }),
     );
     expect(mockNotifications.scheduleNotificationAsync).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         content: expect.objectContaining({
-          data: expect.objectContaining({ activeNotificationId: 'active-id' }),
+          data: expect.objectContaining({
+            activeNotificationId: 'fitnessmate-rest-timer-active',
+          }),
         }),
+        identifier: 'fitnessmate-rest-timer-completion',
         trigger: expect.objectContaining({ seconds: 180, channelId: REST_TIMER_CHANNEL_ID }),
       }),
-    );
-    expect(mockNotifications.scheduleNotificationAsync.mock.calls[1]?.[0].identifier).not.toBe(
-      'active-id',
     );
   });
 
@@ -105,8 +107,23 @@ describe('restTimerService', () => {
     await restTimerService.start(180);
     await restTimerService.start(90);
 
-    expect(mockNotifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('completion-1');
-    expect(mockNotifications.dismissNotificationAsync).toHaveBeenCalledWith('active-1');
+    expect(mockNotifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith(
+      'fitnessmate-rest-timer-completion',
+    );
+    expect(mockNotifications.dismissNotificationAsync).toHaveBeenCalledWith(
+      'fitnessmate-rest-timer-active',
+    );
+  });
+
+  it('stops the timer after the JavaScript process loses its in-memory state', async () => {
+    await restTimerService.stop();
+
+    expect(mockNotifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith(
+      'fitnessmate-rest-timer-completion',
+    );
+    expect(mockNotifications.dismissNotificationAsync).toHaveBeenCalledWith(
+      'fitnessmate-rest-timer-active',
+    );
   });
 
   it('does not call notification APIs outside Android', async () => {
