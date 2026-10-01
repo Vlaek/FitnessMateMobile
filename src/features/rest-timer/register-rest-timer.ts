@@ -55,6 +55,15 @@ export async function registerRestTimer() {
     return;
   }
 
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+
   if (!(await TaskManager.isTaskRegisteredAsync(REST_TIMER_TASK_NAME))) {
     await Notifications.registerTaskAsync(REST_TIMER_TASK_NAME);
   }

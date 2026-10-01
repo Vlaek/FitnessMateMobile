@@ -12,6 +12,7 @@ jest.mock('expo-constants', () => ({
 
 jest.mock('expo-notifications', () => ({
   registerTaskAsync: jest.fn(),
+  setNotificationHandler: jest.fn(),
   BackgroundNotificationTaskResult: { NoData: 1 },
 }));
 
@@ -35,6 +36,20 @@ describe('registerRestTimer', () => {
     jest.mocked(TaskManager.isTaskDefined).mockReturnValue(false);
     jest.mocked(TaskManager.isTaskRegisteredAsync).mockResolvedValue(false);
     jest.mocked(Notifications.registerTaskAsync).mockResolvedValue(null);
+  });
+
+  it('shows rest timer notifications while the app is in the foreground', async () => {
+    await registerRestTimer();
+
+    expect(Notifications.setNotificationHandler).toHaveBeenCalledTimes(1);
+    const handler = jest.mocked(Notifications.setNotificationHandler).mock.calls[0]?.[0];
+
+    await expect(handler?.handleNotification({} as Notifications.Notification)).resolves.toEqual({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    });
   });
 
   it('defines a task whose stop action cancels the active timer', async () => {
