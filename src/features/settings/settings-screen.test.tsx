@@ -31,11 +31,13 @@ jest.mock('@/features/rest-timer/rest-timer-service', () => ({
 }));
 
 jest.mock('@expo/ui', () => {
-  const React = require('react');
-  const { Switch: NativeSwitch, View } = require('react-native');
+  const React = jest.requireActual<typeof import('react')>('react');
+  const { Switch: NativeSwitch, View } =
+    jest.requireActual<typeof import('react-native')>('react-native');
 
   return {
-    Host: ({ children }: { children: React.ReactNode }) => React.createElement(View, null, children),
+    Host: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(View, null, children),
     Switch: (props: object) => React.createElement(NativeSwitch, props),
   };
 });

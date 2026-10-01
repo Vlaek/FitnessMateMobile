@@ -48,12 +48,15 @@ export function SettingsScreen() {
     if (!enabled) {
       setRestTimerEnabled(false);
       await restTimerService.stop();
+
       return;
     }
 
     setRestTimerUpdating(true);
+
     try {
       const granted = await restTimerService.requestPermission();
+
       if (granted) {
         setRestTimerEnabled(true);
       } else {
@@ -389,6 +392,7 @@ async function run(task: () => Promise<void>, success: string) {
 }
 function formatDuration(seconds: number) {
   const minutes = Math.floor(seconds / 60);
+
   return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
 }
 const styles = StyleSheet.create({

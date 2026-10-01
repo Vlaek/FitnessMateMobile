@@ -1,3 +1,11 @@
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+import {
+  REST_TIMER_CATEGORY_ID,
+  REST_TIMER_CHANNEL_ID,
+  restTimerService,
+} from './rest-timer-service';
+
 jest.mock('expo-notifications', () => ({
   getPermissionsAsync: jest.fn(),
   requestPermissionsAsync: jest.fn(),
@@ -8,23 +16,14 @@ jest.mock('expo-notifications', () => ({
   dismissNotificationAsync: jest.fn(),
   AndroidImportance: { HIGH: 4 },
   SchedulableTriggerInputTypes: { TIME_INTERVAL: 'timeInterval' },
+  PermissionStatus: { DENIED: 'denied', GRANTED: 'granted' },
 }));
 
 jest.mock('@/shared/i18n', () => ({
   i18n: {
-    t: (key: string, values?: { time?: string }) =>
-      values?.time ? `${key}:${values.time}` : key,
+    t: (key: string, values?: { time?: string }) => (values?.time ? `${key}:${values.time}` : key),
   },
 }));
-
-import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
-
-import {
-  REST_TIMER_CATEGORY_ID,
-  REST_TIMER_CHANNEL_ID,
-  restTimerService,
-} from './rest-timer-service';
 
 const mockNotifications = jest.mocked(Notifications);
 
@@ -40,14 +39,27 @@ describe('restTimerService', () => {
     mockNotifications.cancelScheduledNotificationAsync.mockReset();
     mockNotifications.dismissNotificationAsync.mockReset();
     mockNotifications.setNotificationChannelAsync.mockResolvedValue(null);
-    mockNotifications.setNotificationCategoryAsync.mockResolvedValue(null);
+    mockNotifications.setNotificationCategoryAsync.mockResolvedValue({
+      identifier: REST_TIMER_CATEGORY_ID,
+      actions: [],
+    });
     mockNotifications.cancelScheduledNotificationAsync.mockResolvedValue(undefined);
     mockNotifications.dismissNotificationAsync.mockResolvedValue(undefined);
   });
 
   it('requests Android notification permission when it is not already granted', async () => {
-    mockNotifications.getPermissionsAsync.mockResolvedValue({ granted: false });
-    mockNotifications.requestPermissionsAsync.mockResolvedValue({ granted: true });
+    mockNotifications.getPermissionsAsync.mockResolvedValue({
+      granted: false,
+      canAskAgain: true,
+      expires: 'never',
+      status: Notifications.PermissionStatus.DENIED,
+    });
+    mockNotifications.requestPermissionsAsync.mockResolvedValue({
+      granted: true,
+      canAskAgain: true,
+      expires: 'never',
+      status: Notifications.PermissionStatus.GRANTED,
+    });
     await expect(restTimerService.requestPermission()).resolves.toBe(true);
     expect(mockNotifications.requestPermissionsAsync).toHaveBeenCalledTimes(1);
   });
@@ -73,6 +85,7 @@ describe('restTimerService', () => {
     expect(mockNotifications.scheduleNotificationAsync).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
+        identifier: 'active-id',
         trigger: expect.objectContaining({ seconds: 180, channelId: REST_TIMER_CHANNEL_ID }),
       }),
     );

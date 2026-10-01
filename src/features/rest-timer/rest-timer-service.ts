@@ -15,11 +15,13 @@ async function requestPermission(): Promise<boolean> {
   }
 
   const current = await Notifications.getPermissionsAsync();
+
   if (current.granted) {
     return true;
   }
 
   const requested = await Notifications.requestPermissionsAsync();
+
   return requested.granted;
 }
 
@@ -50,6 +52,7 @@ async function stop() {
   if (completionId) {
     await Notifications.cancelScheduledNotificationAsync(completionId).catch(() => undefined);
   }
+
   if (activeId) {
     await Notifications.dismissNotificationAsync(activeId).catch(() => undefined);
   }
@@ -82,6 +85,7 @@ async function start(durationSeconds: number, now = new Date()) {
   });
 
   completionNotificationId = await Notifications.scheduleNotificationAsync({
+    identifier: activeNotificationId,
     content: {
       title: i18n.t('restTimer.complete'),
       data: { kind: 'restTimerComplete' },

@@ -1,11 +1,7 @@
 import { exerciseRepository } from '@/database/repositories/exercise-repository';
 import { workoutRepository } from '@/database/repositories/workout-repository';
 import { exerciseDisplayName } from '@/domain/exercises/display-name';
-import {
-  fromCanonicalKg,
-  getWeightUnitTranslationKey,
-  toCanonicalKg,
-} from '@/domain/units/weight';
+import { fromCanonicalKg, getWeightUnitTranslationKey, toCanonicalKg } from '@/domain/units/weight';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { restTimerService } from '@/features/rest-timer/rest-timer-service';
 import { useAppTheme } from '@/shared/theme/use-app-theme';

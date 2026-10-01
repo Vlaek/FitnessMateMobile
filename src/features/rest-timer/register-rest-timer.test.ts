@@ -1,3 +1,9 @@
+import * as Notifications from 'expo-notifications';
+import * as TaskManager from 'expo-task-manager';
+import { Platform } from 'react-native';
+import { restTimerService } from './rest-timer-service';
+import { registerRestTimer } from './register-rest-timer';
+
 jest.mock('expo-notifications', () => ({
   registerTaskAsync: jest.fn(),
   BackgroundNotificationTaskResult: { NoData: 1 },
@@ -14,10 +20,7 @@ jest.mock('./rest-timer-service', () => ({
   restTimerService: { stop: jest.fn() },
 }));
 
-import * as Notifications from 'expo-notifications';
-import * as TaskManager from 'expo-task-manager';
-import { Platform } from 'react-native';
-import { restTimerService } from './rest-timer-service';
+const taskExecutor = jest.mocked(TaskManager.defineTask).mock.calls[0]?.[1];
 
 describe('registerRestTimer', () => {
   beforeEach(() => {
@@ -29,21 +32,16 @@ describe('registerRestTimer', () => {
   });
 
   it('defines a task whose stop action cancels the active timer', async () => {
-    require('./register-rest-timer');
-    const executor = jest.mocked(TaskManager.defineTask).mock.calls[0]?.[1];
-
-    await executor?.({
+    await taskExecutor?.({
       data: { actionIdentifier: 'stop-rest-timer' },
       error: null,
-      executionInfo: { taskName: 'fitnessmate-rest-timer' },
+      executionInfo: { taskName: 'fitnessmate-rest-timer', eventId: 'event-1' },
     });
 
     expect(restTimerService.stop).toHaveBeenCalledTimes(1);
   });
 
   it('registers the task once on Android', async () => {
-    const { registerRestTimer } = require('./register-rest-timer');
-
     await registerRestTimer();
 
     expect(Notifications.registerTaskAsync).toHaveBeenCalledWith('fitnessmate-rest-timer');
