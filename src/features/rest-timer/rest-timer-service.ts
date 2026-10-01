@@ -1,4 +1,4 @@
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import { i18n } from '@/shared/i18n';
 
@@ -9,11 +9,24 @@ export const REST_TIMER_STOP_ACTION_ID = 'stop-rest-timer';
 let activeNotificationId: string | null = null;
 let completionNotificationId: string | null = null;
 
+function canUseNotifications() {
+  return (
+    Platform.OS === 'android' && Constants.executionEnvironment !== ExecutionEnvironment.StoreClient
+  );
+}
+
+function getNotifications(): typeof import('expo-notifications') {
+  // Expo Go throws while importing expo-notifications on Android SDK 53+.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require('expo-notifications');
+}
+
 async function requestPermission(): Promise<boolean> {
-  if (Platform.OS !== 'android') {
+  if (!canUseNotifications()) {
     return false;
   }
 
+  const Notifications = getNotifications();
   const current = await Notifications.getPermissionsAsync();
 
   if (current.granted) {
@@ -25,7 +38,7 @@ async function requestPermission(): Promise<boolean> {
   return requested.granted;
 }
 
-async function configureNotifications() {
+async function configureNotifications(Notifications: typeof import('expo-notifications')) {
   await Notifications.setNotificationChannelAsync(REST_TIMER_CHANNEL_ID, {
     name: i18n.t('settings.restTimer'),
     importance: Notifications.AndroidImportance.HIGH,
@@ -40,10 +53,11 @@ async function configureNotifications() {
 }
 
 async function stop() {
-  if (Platform.OS !== 'android') {
+  if (!canUseNotifications()) {
     return;
   }
 
+  const Notifications = getNotifications();
   const completionId = completionNotificationId;
   const activeId = activeNotificationId;
   completionNotificationId = null;
@@ -59,12 +73,13 @@ async function stop() {
 }
 
 async function start(durationSeconds: number, now = new Date()) {
-  if (Platform.OS !== 'android') {
+  if (!canUseNotifications()) {
     return;
   }
 
+  const Notifications = getNotifications();
   await stop();
-  await configureNotifications();
+  await configureNotifications(Notifications);
 
   const endsAt = new Date(now.getTime() + durationSeconds * 1000);
   const time = endsAt.toLocaleTimeString(i18n.language, {

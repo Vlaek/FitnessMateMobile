@@ -4,6 +4,12 @@ import { Platform } from 'react-native';
 import { restTimerService } from './rest-timer-service';
 import { registerRestTimer } from './register-rest-timer';
 
+jest.mock('expo-constants', () => ({
+  __esModule: true,
+  default: { executionEnvironment: 'standalone' },
+  ExecutionEnvironment: { StoreClient: 'storeClient' },
+}));
+
 jest.mock('expo-notifications', () => ({
   registerTaskAsync: jest.fn(),
   BackgroundNotificationTaskResult: { NoData: 1 },
