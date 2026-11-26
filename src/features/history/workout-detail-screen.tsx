@@ -3,12 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { workoutRepository } from '@/database/repositories/workout-repository';
-import {
-  fromCanonicalKg,
-  getWeightUnitTranslationKey,
-  toCanonicalKg,
-} from '@/domain/units/weight';
+import { fromCanonicalKg, getWeightUnitTranslationKey, toCanonicalKg } from '@/domain/units/weight';
 import type { TWorkout } from '@/domain/workouts/types';
+import { getCompletedExercises } from '@/domain/workouts/completed-exercises';
 import { reportDraftStore } from '@/features/reports/report-draft-store';
 import { usePreferencesStore } from '@/features/settings/preferences-store';
 import { useAppTheme } from '@/shared/theme/use-app-theme';
@@ -95,10 +92,11 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
   }
 
   const editedWorkout = draft ?? workout;
+  const visibleExercises = getCompletedExercises(editedWorkout.exercises);
   const isEditing = draft !== null;
 
   const setExercise = (
-    index: number,
+    exerciseId: string,
     transform: (value: TWorkout['exercises'][number]) => TWorkout['exercises'][number],
   ) => {
     if (!draft) {
@@ -107,9 +105,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
 
     setDraft({
       ...draft,
-      exercises: draft.exercises.map((item, itemIndex) =>
-        itemIndex === index ? transform(item) : item,
-      ),
+      exercises: draft.exercises.map((item) => (item.id === exerciseId ? transform(item) : item)),
     });
   };
 
@@ -157,7 +153,7 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
       </View>
 
       <View style={styles.exerciseList}>
-        {editedWorkout.exercises.map((exercise, exerciseIndex) => (
+        {visibleExercises.map((exercise) => (
           <View
             key={exercise.id}
             style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -180,10 +176,10 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
                           label={`${t('editor.weight')} (${t(getWeightUnitTranslationKey(unit))})`}
                           value={fromCanonicalKg(set.weightKg, unit)}
                           onValueChange={(value) =>
-                            setExercise(exerciseIndex, (current) => ({
+                            setExercise(exercise.id, (current) => ({
                               ...current,
-                              sets: current.sets.map((item, itemIndex) =>
-                                itemIndex === setIndex
+                              sets: current.sets.map((item) =>
+                                item.id === set.id
                                   ? { ...item, weightKg: toCanonicalKg(value, unit) }
                                   : item,
                               ),
@@ -197,10 +193,10 @@ export function WorkoutDetailScreen({ workoutId }: { workoutId: string }) {
                           label={t('editor.reps')}
                           value={set.repetitions}
                           onValueChange={(value) =>
-                            setExercise(exerciseIndex, (current) => ({
+                            setExercise(exercise.id, (current) => ({
                               ...current,
-                              sets: current.sets.map((item, itemIndex) =>
-                                itemIndex === setIndex ? { ...item, repetitions: value } : item,
+                              sets: current.sets.map((item) =>
+                                item.id === set.id ? { ...item, repetitions: value } : item,
                               ),
                             }))
                           }

@@ -1,6 +1,12 @@
 import { randomUUID } from 'expo-crypto';
+import { getCompletedExercises } from '@/domain/workouts/completed-exercises';
 import type { TMuscleGroup } from '@/domain/exercises/types';
-import type { TWorkout, TWorkoutSummary } from '@/domain/workouts/types';
+import type {
+  TExerciseWeightHistory,
+  TWorkout,
+  TWorkoutExercise,
+  TWorkoutSummary,
+} from '@/domain/workouts/types';
 import { database } from '../client';
 import type { IDatabaseAdapter } from '../types';
 
@@ -49,11 +55,16 @@ export interface IWorkoutRepository {
   getActive(): Promise<TWorkout | null>;
   startEmpty(name: string): Promise<TWorkout>;
   startFromProgram(programId: string): Promise<TWorkout>;
+  startFromLastWorkout(programId: string): Promise<TWorkout>;
+  getProgramsWithHistory(): Promise<string[]>;
   save(workout: TWorkout): Promise<void>;
   complete(id: string): Promise<void>;
   getById(id: string): Promise<TWorkout | null>;
   getCompletedByIds(ids: string[]): Promise<TWorkout[]>;
   listCompleted(): Promise<TWorkoutSummary[]>;
+  getExerciseWeightHistory(
+    exercise: Pick<TWorkoutExercise, 'sourceExerciseId' | 'exerciseName' | 'muscleGroup'>,
+  ): Promise<TExerciseWeightHistory[]>;
   delete(id: string): Promise<void>;
 }
 
@@ -165,6 +176,57 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
     });
   }
 
+  async getProgramsWithHistory(): Promise<string[]> {
+    const rows = await this.db.getAllAsync<{ programId: string }>(
+      `SELECT DISTINCT source_program_id AS programId FROM workouts
+       WHERE status = 'completed' AND completed_at IS NOT NULL AND source_program_id IS NOT NULL`,
+    );
+
+    return rows.map((row) => row.programId);
+  }
+
+  async startFromLastWorkout(programId: string): Promise<TWorkout> {
+    let workout!: TWorkout;
+    await this.db.withTransactionAsync(async () => {
+      await this.assertNoActive();
+      const row = await this.db.getFirstAsync<{ id: string }>(
+        `SELECT id FROM workouts WHERE source_program_id = ? AND status = 'completed'
+         AND completed_at IS NOT NULL ORDER BY julianday(completed_at) DESC, id DESC LIMIT 1`,
+        [programId],
+      );
+      const previous = row ? await this.getById(row.id) : null;
+      const completedExercises = getCompletedExercises(previous?.exercises ?? []);
+
+      if (!previous || !completedExercises.length) {
+        throw new Error('No previous workout for this program');
+      }
+
+      const timestamp = this.deps.now();
+      workout = {
+        ...previous,
+        id: this.deps.createId(),
+        sourceProgramId: programId,
+        status: 'draft',
+        startedAt: timestamp,
+        completedAt: null,
+        updatedAt: timestamp,
+        exercises: completedExercises.map((exercise) => ({
+          ...exercise,
+          id: this.deps.createId(),
+          sets: exercise.sets.map((set) => ({
+            ...set,
+            id: this.deps.createId(),
+            isCompleted: false,
+          })),
+        })),
+      };
+      await this.insertWorkout(workout);
+      await this.insertChildren(workout);
+    });
+
+    return workout;
+  }
+
   async complete(id: string): Promise<void> {
     const now = this.deps.now();
     await this.db.runAsync(
@@ -222,7 +284,7 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
   async listCompleted(): Promise<TWorkoutSummary[]> {
     return this.db
       .getAllAsync<TWorkoutSummary>(`SELECT w.id, w.name, w.started_at AS startedAt, w.completed_at AS completedAt,
-      COUNT(DISTINCT we.id) AS exerciseCount, COUNT(ws.id) AS setCount,
+      COUNT(DISTINCT CASE WHEN ws.id IS NOT NULL THEN we.id END) AS exerciseCount, COUNT(ws.id) AS setCount,
       COALESCE(SUM(ws.weight_kg * ws.repetitions), 0) AS volumeKg
       FROM workouts w LEFT JOIN workout_exercises we ON we.workout_id = w.id
       LEFT JOIN workout_sets ws ON ws.workout_exercise_id = we.id AND ws.is_completed = 1
@@ -243,6 +305,29 @@ export class SqliteWorkoutRepository implements IWorkoutRepository {
     }
 
     return workouts;
+  }
+
+  async getExerciseWeightHistory(
+    exercise: Pick<TWorkoutExercise, 'sourceExerciseId' | 'exerciseName' | 'muscleGroup'>,
+  ): Promise<TExerciseWeightHistory[]> {
+    const rows = await this.db.getAllAsync<TExerciseWeightHistory>(
+      `WITH history AS (
+        SELECT ws.weight_kg, ws.repetitions, ROW_NUMBER() OVER (
+          ORDER BY julianday(w.completed_at) DESC, w.id DESC, we.sort_order DESC, ws.sort_order DESC
+        ) AS recency
+        FROM workout_sets ws
+        JOIN workout_exercises we ON we.id = ws.workout_exercise_id
+        JOIN workouts w ON w.id = we.workout_id
+        WHERE w.status = 'completed' AND w.completed_at IS NOT NULL AND ws.is_completed = 1
+          AND (we.source_exercise_id = ? OR
+            (we.source_exercise_id IS NULL AND we.exercise_name = ? AND we.muscle_group = ?))
+      )
+      SELECT weight_kg AS weightKg, MAX(repetitions) AS maxRepetitions
+      FROM history GROUP BY weight_kg ORDER BY MIN(recency) LIMIT 4`,
+      [exercise.sourceExerciseId, exercise.exerciseName, exercise.muscleGroup],
+    );
+
+    return rows.reverse();
   }
 
   private async assertNoActive() {

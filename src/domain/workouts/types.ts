@@ -7,6 +7,11 @@ export type TWorkoutSet = {
   isCompleted: boolean;
 };
 
+export type TExerciseWeightHistory = {
+  weightKg: number;
+  maxRepetitions: number;
+};
+
 export type TWorkoutExercise = {
   id: string;
   sourceExerciseId: string | null;

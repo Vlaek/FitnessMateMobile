@@ -1,5 +1,5 @@
 import { useFocusEffect, router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TProgramSummary } from '@/domain/programs/types';
@@ -16,28 +16,61 @@ export default function StartScreen() {
   const [programs, setPrograms] = useState<TProgramSummary[]>([]);
   const [hasActive, setHasActive] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [historyPrograms, setHistoryPrograms] = useState<string[]>([]);
+  const [error, setError] = useState(false);
+  const starting = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      void Promise.all([programRepository.list(), workoutRepository.getActive()]).then(
-        ([items, active]) => {
+      let activeScreen = true;
+      void Promise.all([
+        programRepository.list(),
+        workoutRepository.getActive(),
+        workoutRepository.getProgramsWithHistory(),
+      ])
+        .then(([items, active, history]) => {
+          if (!activeScreen) {
+            return;
+          }
+
           setPrograms(items);
           setHasActive(Boolean(active));
-        },
-      );
+          setHistoryPrograms(history);
+          setError(false);
+        })
+        .catch(() => {
+          if (activeScreen) {
+            setError(true);
+          }
+        });
+
+      return () => {
+        activeScreen = false;
+      };
     }, []),
   );
-  const begin = async (programId?: string) => {
+  const begin = async (programId?: string, last = false) => {
+    if (starting.current) {
+      return;
+    }
+
+    starting.current = true;
     setBusy(true);
+    setError(false);
 
     try {
-      if (programId) {
+      if (programId && last) {
+        await workoutRepository.startFromLastWorkout(programId);
+      } else if (programId) {
         await workoutRepository.startFromProgram(programId);
       } else {
         await workoutRepository.startEmpty(t('workout.defaultName'));
       }
 
       router.push('/workout');
+    } catch {
+      setError(true);
     } finally {
+      starting.current = false;
       setBusy(false);
     }
   };
@@ -47,6 +80,11 @@ export default function StartScreen() {
       <AppHeader title={t('start.title')} />
       <View style={styles.content}>
         <Text style={[styles.lead, { color: colors.text }]}>{t('start.choose')}</Text>
+        {error ? (
+          <Text accessibilityRole="alert" style={{ color: colors.danger }}>
+            {t('start.failed')}
+          </Text>
+        ) : null}
         {hasActive ? (
           <Button label={t('home.resumeDraft')} onPress={() => router.push('/workout')} />
         ) : (
@@ -75,11 +113,21 @@ export default function StartScreen() {
                     {item.exerciseCount} {t('programs.exerciseCount')}
                   </Text>
                 </View>
-                <Button
-                  label={t('nav.start')}
-                  disabled={busy}
-                  onPress={() => void begin(item.id)}
-                />
+                <View style={styles.actions}>
+                  <Button
+                    style={{ flex: 1 }}
+                    label={t('start.normal')}
+                    disabled={busy}
+                    onPress={() => void begin(item.id)}
+                  />
+                  <Button
+                    style={{ flex: 1 }}
+                    label={t('start.last')}
+                    variant="secondary"
+                    disabled={busy || !historyPrograms.includes(item.id)}
+                    onPress={() => void begin(item.id, true)}
+                  />
+                </View>
               </View>
             )}
             ListEmptyComponent={
@@ -103,9 +151,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
     padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 12,
   },
+  actions: { flexDirection: 'row', gap: 8 },
   name: { fontSize: 17, fontWeight: '800' },
 });
