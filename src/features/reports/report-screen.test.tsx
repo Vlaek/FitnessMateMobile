@@ -42,6 +42,40 @@ const lateWorkout = createWorkout({
 });
 
 describe('ReportScreen', () => {
+  it('previews and shares only the added completed exercise after skipping the program', async () => {
+    const completed = {
+      ...earlyWorkout,
+      sourceProgramId: 'program',
+      exercises: [
+        {
+          id: 'skipped',
+          sourceExerciseId: 'press',
+          exerciseName: 'Skipped press',
+          muscleGroup: 'chest' as const,
+          sets: [{ id: 'skipped-set', weightKg: 80, repetitions: 10, isCompleted: false }],
+        },
+        {
+          id: 'added',
+          sourceExerciseId: 'squat',
+          exerciseName: 'Added squat',
+          muscleGroup: 'legs' as const,
+          sets: [{ id: 'added-set', weightKg: 50, repetitions: 10, isCompleted: true }],
+        },
+      ],
+    };
+    reportDraftStore.getState().setWorkoutIds([completed.id]);
+    jest.mocked(workoutRepository.getCompletedByIds).mockResolvedValue([completed]);
+    const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: Share.sharedAction });
+    const view = await render(<ReportScreen />);
+    const preview = await view.findByTestId('report-preview');
+    const text = String(preview.props.children);
+
+    expect(text).toContain('1. Added squat - 1 × 10 × 50 kg');
+    expect(text).not.toContain('Skipped press');
+    expect(text).toContain('Total output: 500 kg');
+    await fireEvent.press(view.getByText('Share'));
+    expect(share).toHaveBeenCalledWith(expect.objectContaining({ message: text }));
+  });
   beforeAll(async () => setAppLanguage('en'));
 
   beforeEach(() => {

@@ -53,6 +53,43 @@ function workout(overrides: Partial<TWorkout> = {}): TWorkout {
 }
 
 describe('generateWorkoutReport', () => {
+  it('omits skipped program exercises when only newly added exercises were completed', () => {
+    const session = workout({
+      sourceProgramId: 'program-1',
+      exercises: [
+        ...workout().exercises.map((exercise) => ({
+          ...exercise,
+          sets: exercise.sets.map((set) => ({ ...set, isCompleted: false })),
+        })),
+        {
+          id: 'added',
+          sourceExerciseId: 'squat',
+          exerciseName: 'Added squat',
+          muscleGroup: 'legs',
+          sets: [
+            { id: 'added-1', weightKg: 50, repetitions: 10, isCompleted: true },
+            { id: 'added-2', weightKg: 100, repetitions: 5, isCompleted: false },
+          ],
+        },
+      ],
+    });
+    const result = generateWorkoutReport({
+      workouts: [session],
+      selectionOrder: [session.id],
+      sortMode: 'selection',
+      title: '',
+      description: '',
+      weightUnit: 'kg',
+      locale: 'en-US',
+      labels,
+    });
+
+    expect(result).toBe(
+      'NewMeta - Back focus\n\n1. Added squat - 1 × 10 × 50 kg\n\nTotal output: 500 kg',
+    );
+    expect(result).not.toContain('Bench press');
+    expect(result).not.toContain('Hyperextension');
+  });
   it('sorts by date when Array.prototype.toSorted is unavailable', () => {
     const originalToSorted = Array.prototype.toSorted;
     // React Native's JavaScript runtime may not provide this newer array method.

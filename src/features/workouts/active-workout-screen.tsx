@@ -18,6 +18,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ExercisePicker } from '../programs/editor/exercise-picker';
 import { sanitizeWorkout } from './sanitize-workout';
 import { useActiveWorkout } from './use-active-workout';
+import { ExerciseWeightHistory } from './exercise-weight-history';
 
 /** Экран действующей тренировки */
 export function ActiveWorkoutScreen() {
@@ -145,6 +146,15 @@ export function ActiveWorkoutScreen() {
               }
             />
           </View>
+
+          <ExerciseWeightHistory
+            key={JSON.stringify([
+              exercise.sourceExerciseId,
+              exercise.exerciseName,
+              exercise.muscleGroup,
+            ])}
+            exercise={exercise}
+          />
 
           {/* Подходы упражнения */}
           {exercise.sets.map((set, setIndex) => (
